@@ -10,7 +10,9 @@ The document editor is powered by Tiptap v3. It integrates with ProseMirror unde
 
 - **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`. Always set `immediatelyRender: false` in Next.js App Router to avoid React 19 SSR hydration mismatch warnings.
 - **Canonical Component & Exports**: The core document editor component is named `DocumentEditor` located at `app/documents/[documentId]/editor.tsx` and accepts `DocumentEditorProps` (`{ documentId?: string }`). An alias export `export { DocumentEditor as Editor }` is provided for backwards compatibility.
-- **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) so toolbar controls can execute commands.
+- **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) via `useEditor` lifecycle callbacks (`onCreate`, `onDestroy`, `onUpdate`, `onSelectionUpdate`, `onTransaction`, `onFocus`, `onBlur`, `onContentError`) so toolbar controls can execute commands and react to editor state changes.
+- **Core Extensions Configuration**: Standard editor extensions include `StarterKit`, `Image.configure({ resize: { enabled: true } })`, `Table.configure({ resizable: true })`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem.configure({ nested: true })`, and `TaskList`.
+- **Native Image Resizing (Tiptap v3)**: Tiptap v3 incorporates resizable node views directly in `@tiptap/extension-image` via `Image.configure({ resize: { enabled: true } })`. Never register third-party extensions (e.g. `tiptap-extension-resize-image`) alongside `@tiptap/extension-image`, as duplicate node definitions cause editor warnings and inconsistent image parsing.
 - **Content Persistence**: Content state is synchronized collaboratively with Liveblocks via `@liveblocks/react-tiptap`.
 
 ---
@@ -115,34 +117,82 @@ export const FontSizeExtension = Extension.create({
    - Media queries (`@media print`) hide toolbars, rulers, and collaboration chrome, printing only the editor document body with clean pagination.
 4. **Theming & Dark Mode**:
    - The document canvas adapts via semantic card tokens on-screen (`bg-card text-card-foreground border-border`) while print media strictly forces physical white paper (`print:bg-white print:text-black`). Detailed rules are documented in [`docs/theming.md`](theming.md).
+5. **Task List & Nested List Typography (`app/globals.css`)**:
+   - Task list selectors must strictly target direct children: `ul[data-type="taskList"] > li` (using child combinator `>`).
+   - Never use descendant selector `ul[data-type="taskList"] li`, which matches standard ordered (`ol > li`) or unordered (`ul > li`) lists nested inside task items, stripping their bullet/number markers and inappropriately forcing task flex layout.
 
 ---
 
 ## 5. Toolbar Component Pattern
 
-Toolbar controls should read state and execute chains against the active editor stored in `useEditorStore`:
+The document toolbar (`app/documents/[documentId]/toolbar.tsx`) reads state and executes commands against the active editor stored in `useEditorStore`. Controls are organized into grouped multi-dimensional sections (`sections: { label, icon, onClick, isActive? }[][]`) rendered as compact, accessible buttons inside a semantic pill container (`min-h-10 flex items-center gap-x-0.5 overflow-x-auto rounded-[24px] bg-muted/70 px-2.5 py-0.5 print:hidden`):
 
 ```tsx
-// components/toolbar/bold-button.tsx
+// app/documents/[documentId]/toolbar.tsx
 "use client"
 
-import { Bold } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { type LucideIcon, Undo2Icon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
 import { useEditorStore } from "@/store/use-editor-store"
 
-export function BoldButton() {
+interface ToolbarButtonProps {
+  onClick?: () => void
+  isActive?: boolean
+  icon: LucideIcon
+  "aria-label"?: string
+}
+
+function ToolbarButton({
+  "aria-label": ariaLabel,
+  icon: Icon,
+  isActive,
+  onClick,
+}: ToolbarButtonProps) {
+  return (
+    <button
+      aria-label={ariaLabel}
+      className={cn(
+        "flex h-7 min-w-7 items-center justify-center rounded-sm text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
+        isActive && "bg-muted-foreground/20"
+      )}
+      onClick={onClick}
+    >
+      <Icon className="size-4" />
+    </button>
+  )
+}
+
+export function Toolbar() {
   const { editor } = useEditorStore()
 
+  const sections: {
+    label: string
+    icon: LucideIcon
+    onClick: () => void
+    isActive?: boolean
+  }[][] = [
+    [
+      {
+        label: "Undo",
+        icon: Undo2Icon,
+        onClick: () => editor?.chain().focus().undo().run(),
+      },
+    ],
+  ]
+
   return (
-    <Button
-      aria-label="Toggle Bold"
-      disabled={!editor}
-      size="sm"
-      variant={editor?.isActive("bold") ? "secondary" : "ghost"}
-      onClick={() => editor?.chain().focus().toggleBold().run()}
-    >
-      <Bold className="size-4" />
-    </Button>
+    <div className="flex min-h-10 items-center gap-x-0.5 overflow-x-auto rounded-[24px] bg-muted/70 px-2.5 py-0.5 print:hidden">
+      {sections[0].map((item) => (
+        <ToolbarButton
+          key={item.label}
+          aria-label={item.label}
+          icon={item.icon}
+          isActive={item.isActive}
+          onClick={item.onClick}
+        />
+      ))}
+    </div>
   )
 }
 ```
