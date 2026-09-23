@@ -370,12 +370,12 @@ The horizontal ruler must seamlessly integrate into both light and dark document
 - **Ruler Ticks & Scale Numbers**: `text-[10px] text-muted-foreground/70`.
 - **Margin Drag Markers (Left & Right)**: Marker SVGs use `fill-primary hover:fill-primary/80` for high visibility on the scale.
 
-### Document Toolbar (`components/toolbar/`)
+### Document Toolbar (`app/documents/[documentId]/toolbar.tsx`)
 
-- **Toolbar Container**: Sticky top frame with `bg-background/95 backdrop-blur border-b border-border`.
+- **Toolbar Pill Container**: `min-h-10 flex items-center gap-x-0.5 overflow-x-auto rounded-[24px] bg-muted/70 px-2.5 py-0.5 print:hidden`.
 - **Toolbar Buttons**:
-  - Inactive: `variant="ghost"` (`text-foreground hover:bg-accent hover:text-accent-foreground`).
-  - Active: `variant="secondary"` (`bg-secondary text-secondary-foreground`).
+  - Inactive: `text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`.
+  - Active: `bg-muted-foreground/20`.
   - Disabled: `disabled:opacity-40 disabled:pointer-events-none`.
 
 ---

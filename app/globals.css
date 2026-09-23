@@ -127,3 +127,128 @@
     @apply font-sans;
   }
 }
+
+.tiptap {
+  /* Image-specific styling */
+  img {
+    @apply my-6 block h-auto max-w-full;
+
+    &.ProseMirror-selectednode {
+      @apply outline-3 outline-primary;
+    }
+  }
+
+  /* Table-specific styling */
+  table {
+    @apply m-0 w-full table-fixed border-collapse overflow-hidden;
+
+    td,
+    th {
+      @apply relative box-border min-w-[1em] border border-border px-2 py-1.5 align-top;
+
+      > * {
+        @apply mb-0;
+      }
+    }
+
+    th {
+      @apply bg-muted text-left font-bold;
+    }
+
+    .selectedCell:after {
+      @apply pointer-events-none absolute inset-0 z-2 bg-primary/10 content-[''];
+    }
+
+    .column-resize-handle {
+      @apply pointer-events-none absolute top-0 -right-0.5 -bottom-0.5 w-1 bg-primary;
+    }
+  }
+
+  .tableWrapper {
+    @apply my-6 overflow-x-auto;
+  }
+
+  &.resize-cursor {
+    @apply cursor-col-resize;
+  }
+
+  /* Heading styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply mt-10 leading-tight font-bold text-pretty text-card-foreground;
+  }
+
+  h1,
+  h2 {
+    @apply mt-14 mb-6;
+  }
+
+  h1 {
+    @apply text-[1.4rem];
+  }
+
+  h2 {
+    @apply text-[1.2rem];
+  }
+
+  h3 {
+    @apply text-[1.1rem];
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply text-base;
+  }
+
+  /* List styles */
+  ul,
+  ol {
+    @apply my-5 mr-4 ml-1.5 px-4;
+  }
+
+  ul li {
+    @apply list-disc;
+
+    p {
+      @apply my-1;
+    }
+  }
+
+  ol li {
+    @apply list-decimal;
+
+    p {
+      @apply my-1;
+    }
+  }
+
+  /* Task list specific styles */
+  ul[data-type="taskList"] {
+    @apply ml-0 list-none p-0;
+
+    li {
+      @apply flex items-start;
+
+      > label {
+        @apply mr-2 shrink-0 select-none;
+      }
+
+      > div {
+        @apply min-w-0 flex-1;
+      }
+    }
+
+    input[type="checkbox"] {
+      @apply cursor-pointer;
+    }
+
+    ul[data-type="taskList"] {
+      @apply m-0;
+    }
+  }
+}
