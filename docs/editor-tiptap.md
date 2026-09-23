@@ -8,7 +8,8 @@ This document details the configuration, custom extensions, ProseMirror schema c
 
 The document editor is powered by Tiptap v3. It integrates with ProseMirror under the hood, running in a headless client component:
 
-- **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`.
+- **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`. Always set `immediatelyRender: false` in Next.js App Router to avoid React 19 SSR hydration mismatch warnings.
+- **Canonical Component & Exports**: The core document editor component is named `DocumentEditor` located at `app/documents/[documentId]/editor.tsx` and accepts `DocumentEditorProps` (`{ documentId?: string }`). An alias export `export { DocumentEditor as Editor }` is provided for backwards compatibility.
 - **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) so toolbar controls can execute commands.
 - **Content Persistence**: Content state is synchronized collaboratively with Liveblocks via `@liveblocks/react-tiptap`.
 
@@ -102,14 +103,18 @@ export const FontSizeExtension = Extension.create({
 
 ## 4. Document Canvas, Ruler & Printable Margins
 
-1. **Page Canvas Dimensions**:
-   - The document canvas simulates a standard print page (816px width for standard 8.5in × 11in document at 96 DPI).
-   - Wrapped in a responsive viewport with a minimum height (`min-h-[1056px]`) and drop shadow.
+1. **Page Canvas Dimensions & Layout Structure**:
+   - The document canvas simulates a standard print page (816px width for standard 8.5in × 11in document at 96 DPI, `min-h-[1054px]`).
+   - **Outer Scroll Wrapper**: `size-full overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0`.
+   - **Centering Container**: `mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0`.
+   - **Editor Element (`editorProps.attributes`)**: `focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none`, with left and right margins dynamically mapped to padding.
 2. **Interactive Ruler (`ruler.tsx`)**:
    - Left and right margin markers emit drag coordinates to control document indentation.
    - Ruler values correspond directly to padding styles on the print container (e.g., `paddingLeft: ${leftMargin}px`).
 3. **Print Support**:
    - Media queries (`@media print`) hide toolbars, rulers, and collaboration chrome, printing only the editor document body with clean pagination.
+4. **Theming & Dark Mode**:
+   - The document canvas adapts via semantic card tokens on-screen (`bg-card text-card-foreground border-border`) while print media strictly forces physical white paper (`print:bg-white print:text-black`). Detailed rules are documented in [`docs/theming.md`](theming.md).
 
 ---
 

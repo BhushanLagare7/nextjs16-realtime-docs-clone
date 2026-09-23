@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
+// SEO and social sharing metadata for the app
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
   },
 }
 
+// App fonts: sans-serif for body text, monospace for code
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
@@ -54,6 +56,10 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+/**
+ * Root layout that wraps every page.
+ * Sets up global fonts, theming, and the base HTML/body structure.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -68,7 +74,7 @@ export default function RootLayout({
         geist.variable
       )}
       lang="en"
-      suppressHydrationWarning
+      suppressHydrationWarning // Avoids mismatch warnings from next-themes
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>

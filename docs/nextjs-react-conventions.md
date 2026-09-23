@@ -65,6 +65,8 @@ export default function DocumentPage({ params }: { params: { documentId: string 
        ...
      }
      ```
+4. **Function Declaration Syntax**:
+   - Always declare and export components and functions using function declarations directly (`export default function ComponentName() { ... }` or `export function ComponentName() { ... }`), rather than arrow functions assigned to `const` variables.
 
 ---
 
@@ -92,11 +94,14 @@ export default function DocumentPage({ params }: { params: { documentId: string 
      }
      ```
 
+5. **Global Keyboard Shortcut Listeners**:
+   - Always guard listeners against editable targets (`target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))`) to prevent hotkeys (e.g. theme toggle shortcuts) from firing while a user is typing inside text inputs, textareas, or Tiptap editor nodes.
+
 ---
 
 ## 4. Special Next.js App Router Files
 
-- **`layout.tsx`**: Defines the shared UI frame. Wraps children with providers (`ThemeProvider`, `NuqsAdapter`, `ConvexClientProvider`).
+- **`layout.tsx`**: Defines the shared UI frame. Wraps children with providers (`ThemeProvider`, `NuqsAdapter`, `ConvexClientProvider`). Include `suppressHydrationWarning` on `<html lang="en">` to prevent attribute mismatch warnings when `next-themes` injects theme classes.
 - **`loading.tsx`**: Renders instant loading skeletons using React Suspense while server data resolves.
 - **`error.tsx`**: Error boundary catch-all for a route segment. **Must always include `"use client"`**.
 - **`not-found.tsx`**: Displayed when `notFound()` is invoked.
