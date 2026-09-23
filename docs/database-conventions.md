@@ -51,14 +51,10 @@ Every mutation and query accessing private documents must verify the user identi
 ```typescript
 // convex/documents.ts
 import { mutation, query } from "./_generated/server"
-import { v } from "convex/values"
 
 export const get = query({
-  args: {
-    paginationOpts: v.optional(v.any()),
-    search: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
+  args: {},
+  handler: async (ctx) => {
     const user = await ctx.auth.getUserIdentity()
     if (!user) {
       throw new Error("Unauthorized")

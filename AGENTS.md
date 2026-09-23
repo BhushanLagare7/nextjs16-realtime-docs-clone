@@ -18,7 +18,7 @@ You MUST adhere to these critical rules across all tasks without exception:
 1. **Pre-Commit Verification**: Always run `npm run format:check && npm run lint && npm run typecheck` before completing any task.
 2. **Next.js 16 Async Route Params**: Dynamic route `params` and `searchParams` are Promises — always `await` them (`const { documentId } = await params`).
 3. **Strict Type Safety**: Zero `any` policy. Never use `@ts-ignore` or `@ts-nocheck`. Fix underlying types.
-4. **Protected Files**: NEVER modify `.env.local`, `next.config.ts`, `tsconfig.json`, or `.gitignore` without explicit user instruction.
+4. **Protected Files**: NEVER modify `.env.local`, `next.config.ts`, `tsconfig.json`, `.gitignore`, `postcss.config.mjs`, or `components.json` without explicit user instruction.
 5. **Tiptap Node Attributes**: Never apply block attributes (e.g., `lineHeight`, `textAlign`) to inline text nodes.
 
 ---

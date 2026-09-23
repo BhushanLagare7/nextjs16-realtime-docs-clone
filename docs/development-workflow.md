@@ -68,6 +68,7 @@ Commits must follow Conventional Commits formatting:
    - `tsconfig.json`: Compiler options and path aliases.
    - `postcss.config.mjs`: Tailwind PostCSS pipeline.
    - `components.json`: shadcn component registry config.
+   - `.gitignore`: Git untracked files specification.
 2. **Environment Secrets**:
    - `.env.local`: Contains sensitive production or development keys. Never commit or overwrite.
 3. **Build Artifacts**:

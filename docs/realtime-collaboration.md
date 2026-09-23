@@ -81,6 +81,21 @@ Liveblocks room access is authorized server-side via a Next.js 16 route handler 
 
      const { room } = await request.json()
 
+     // Resolve room to document and verify organization or owner access
+     const document = await getDocument(room)
+     if (!document) {
+       return new Response("Unauthorized", { status: 401 })
+     }
+
+     const isOwner = document.ownerId === user.id
+     const isOrgMember =
+       document.organizationId &&
+       document.organizationId === (sessionClaims.org_id as string | undefined)
+
+     if (!isOwner && !isOrgMember) {
+       return new Response("Unauthorized", { status: 401 })
+     }
+
      const session = liveblocks.prepareSession(user.id, {
        userInfo: {
          name: user.fullName || "Anonymous",

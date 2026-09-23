@@ -96,8 +96,8 @@ Enforced by ESLint rule `react/jsx-sort-props`:
 ```tsx
 // ✅ Correct JSX Prop Order
 <Button
-  ref={buttonRef}
   key={tool.id}
+  ref={buttonRef}
   disabled={!editor}
   className="h-7 min-w-7 p-1"
   size="sm"

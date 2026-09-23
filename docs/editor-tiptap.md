@@ -40,6 +40,8 @@ Custom extensions are authored in `extensions/` by extending core Tiptap classes
 ```typescript
 // extensions/font-size.ts
 import { Extension } from "@tiptap/core"
+// Provides TypeScript command chaining augmentation only; TextStyle must also be
+// explicitly registered in the editor's extensions array (or via TextStyleKit).
 import "@tiptap/extension-text-style"
 
 declare module "@tiptap/core" {
