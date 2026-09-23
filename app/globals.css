@@ -231,7 +231,7 @@
   ul[data-type="taskList"] {
     @apply ml-0 list-none p-0;
 
-    li {
+    > li {
       @apply flex items-start;
 
       > label {

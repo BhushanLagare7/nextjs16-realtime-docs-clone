@@ -11,6 +11,8 @@ The document editor is powered by Tiptap v3. It integrates with ProseMirror unde
 - **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`. Always set `immediatelyRender: false` in Next.js App Router to avoid React 19 SSR hydration mismatch warnings.
 - **Canonical Component & Exports**: The core document editor component is named `DocumentEditor` located at `app/documents/[documentId]/editor.tsx` and accepts `DocumentEditorProps` (`{ documentId?: string }`). An alias export `export { DocumentEditor as Editor }` is provided for backwards compatibility.
 - **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) via `useEditor` lifecycle callbacks (`onCreate`, `onDestroy`, `onUpdate`, `onSelectionUpdate`, `onTransaction`, `onFocus`, `onBlur`, `onContentError`) so toolbar controls can execute commands and react to editor state changes.
+- **Core Extensions Configuration**: Standard editor extensions include `StarterKit`, `Image.configure({ resize: { enabled: true } })`, `Table.configure({ resizable: true })`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem.configure({ nested: true })`, and `TaskList`.
+- **Native Image Resizing (Tiptap v3)**: Tiptap v3 incorporates resizable node views directly in `@tiptap/extension-image` via `Image.configure({ resize: { enabled: true } })`. Never register third-party extensions (e.g. `tiptap-extension-resize-image`) alongside `@tiptap/extension-image`, as duplicate node definitions cause editor warnings and inconsistent image parsing.
 - **Content Persistence**: Content state is synchronized collaboratively with Liveblocks via `@liveblocks/react-tiptap`.
 
 ---
@@ -115,6 +117,9 @@ export const FontSizeExtension = Extension.create({
    - Media queries (`@media print`) hide toolbars, rulers, and collaboration chrome, printing only the editor document body with clean pagination.
 4. **Theming & Dark Mode**:
    - The document canvas adapts via semantic card tokens on-screen (`bg-card text-card-foreground border-border`) while print media strictly forces physical white paper (`print:bg-white print:text-black`). Detailed rules are documented in [`docs/theming.md`](theming.md).
+5. **Task List & Nested List Typography (`app/globals.css`)**:
+   - Task list selectors must strictly target direct children: `ul[data-type="taskList"] > li` (using child combinator `>`).
+   - Never use descendant selector `ul[data-type="taskList"] li`, which matches standard ordered (`ol > li`) or unordered (`ul > li`) lists nested inside task items, stripping their bullet/number markers and inappropriately forcing task flex layout.
 
 ---
 

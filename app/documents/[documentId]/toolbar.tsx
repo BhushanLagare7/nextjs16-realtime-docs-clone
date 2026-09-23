@@ -6,12 +6,16 @@ import { cn } from "@/lib/utils"
 import { useEditorStore } from "@/store/use-editor-store"
 
 interface ToolbarButtonProps {
+  /** Handler invoked when the button is clicked */
   onClick?: () => void
+  /** Whether the button represents an active/enabled editor state */
   isActive?: boolean
+  /** Icon component to render inside the button */
   icon: LucideIcon
   "aria-label"?: string
 }
 
+/** Small icon-only button used within the editor toolbar */
 function ToolbarButton({
   "aria-label": ariaLabel,
   icon: Icon,
@@ -32,9 +36,14 @@ function ToolbarButton({
   )
 }
 
+/**
+ * Editor toolbar containing action buttons (e.g. Undo) that operate
+ * on the currently active Tiptap editor instance from the global store.
+ */
 export function Toolbar() {
   const { editor } = useEditorStore()
 
+  // Grouped toolbar buttons; structured as sections for future extensibility
   const sections: {
     label: string
     icon: LucideIcon
