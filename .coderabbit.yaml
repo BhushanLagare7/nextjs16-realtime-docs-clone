@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+
+reviews:
+  path_filters:
+    # Exclude skill files and documentation injected by agent CLIs
+    - "!skills/**"
+    - "!**/skills/**"
+    - "!.agents/**"
