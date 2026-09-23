@@ -123,7 +123,7 @@ Enforced by ESLint rule `react/jsx-sort-props`:
            className={cn(
              "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
              active
-               ? "bg-emerald-500/10 text-emerald-600"
+               ? "bg-primary/10 text-primary"
                : "bg-muted text-muted-foreground",
              className
            )}
@@ -141,6 +141,9 @@ Enforced by ESLint rule `react/jsx-sort-props`:
 4. **Zero Hardcoded Colors Policy**:
    - Never use hardcoded hex values (e.g., `#FAFBFD`, `#C7C7C7`, `#ffffff`), RGB/HSL, or raw Tailwind color utility classes (e.g., `bg-white`, `text-black`, `text-blue-500`, `dark:bg-zinc-900`).
    - All styling must strictly utilize established semantic tokens or theme CSS variables (`bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `bg-muted`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-secondary`, etc.).
+   - **Exceptions**:
+     - Collaborator cursor labels (`.collaboration-cursor__label`) may use fixed white text (`#ffffff`) for contrast against saturated collaborator colors.
+     - Document canvas print styles may use `print:bg-white` and `print:text-black` to guarantee standard physical paper output regardless of the active screen theme.
    - Full theming architecture and token pairing rules are documented in [`docs/theming.md`](theming.md).
 
 ---

@@ -46,18 +46,19 @@ The application implements a **tri-theme model** supporting:
 ### Invariant Rules
 
 1. **Hydration Warning Suppression**:
-   - The root `<html>` element in [`app/layout.tsx`](file:///Users/blagare/Desktop/Next%20JS%20Learning/nextjs16-realtime-docs-clone/app/layout.tsx) MUST include `suppressHydrationWarning` to prevent React hydration mismatch warnings when `next-themes` updates the `class` attribute before mounting.
+   - The root `<html>` element in [`app/layout.tsx`](../app/layout.tsx) MUST include `suppressHydrationWarning` to prevent React hydration mismatch warnings when `next-themes` updates the `class` attribute before mounting.
 2. **Zero Manual `dark:` Color Overrides**:
    - NEVER use manual class combinations such as `bg-white dark:bg-zinc-900` or `text-black dark:text-white` on components.
    - ALWAYS use semantic tokens (e.g. `bg-background text-foreground`, `bg-card text-card-foreground`). Semantic tokens resolve automatically to their respective `:root` or `.dark` CSS variables.
 3. **Print Media Isolation**:
    - The document canvas MUST print strictly in paper white with black ink regardless of whether the user is actively viewing in dark or light mode (`print:bg-white print:text-black print:border-none print:shadow-none`).
+   - Print utilities (`print:bg-white` and `print:text-black`) are explicitly permitted as an exception to the raw-color restriction to ensure physical paper output remains white with black text.
 
 ---
 
 ## 2. Tailwind CSS v4 & OKLCH Semantic Tokens
 
-All colors are defined in [`app/globals.css`](file:///Users/blagare/Desktop/Next%20JS%20Learning/nextjs16-realtime-docs-clone/app/globals.css) using the **OKLCH** color model (`oklch(L C H)`), which offers uniform perceived lightness and superior color rendering across displays.
+All colors are defined in [`app/globals.css`](../app/globals.css) using the **OKLCH** color model (`oklch(L C H)`), which offers uniform perceived lightness and superior color rendering across displays.
 
 ### Tailwind v4 Configuration
 
@@ -344,7 +345,10 @@ export function ClerkThemeProvider({
       appearance={{
         baseTheme: resolvedTheme === "dark" ? dark : undefined,
         variables: {
-          colorPrimary: "oklch(0.205 0 0)", // Matches app primary token
+          colorPrimary:
+            resolvedTheme === "dark"
+              ? "oklch(0.922 0 0)" // Matches active dark primary token
+              : "oklch(0.205 0 0)", // Matches active light primary token
         },
       }}
     >
@@ -380,7 +384,7 @@ The horizontal ruler must seamlessly integrate into both light and dark document
 
 ### 1. Global Keyboard Shortcut
 
-Configured in [`components/theme-provider.tsx`](file:///Users/blagare/Desktop/Next%20JS%20Learning/nextjs16-realtime-docs-clone/components/theme-provider.tsx):
+Configured in [`components/theme-provider.tsx`](../components/theme-provider.tsx):
 
 - Pressing **`d`** toggles between `light` and `dark`.
 - The hotkey listener inspects `event.target` to safely ignore keystrokes inside `input`, `textarea`, `select`, or any `contentEditable` element (preventing accidental toggling while drafting documents in Tiptap).
