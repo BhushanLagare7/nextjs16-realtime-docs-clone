@@ -3,6 +3,10 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
+/**
+ * Wraps the app with next-themes and adds a global "d" hotkey
+ * to quickly toggle between light and dark mode.
+ */
 function ThemeProvider({
   children,
   ...props
@@ -21,6 +25,8 @@ function ThemeProvider({
   )
 }
 
+// Checks if the event target is an editable/input element,
+// so the hotkey doesn't fire while the user is typing.
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
     return false
@@ -34,6 +40,8 @@ function isTypingTarget(target: EventTarget | null) {
   )
 }
 
+// Listens for the "d" key press and toggles the theme,
+// ignoring modifier keys, repeats, and typing contexts.
 function ThemeHotkey() {
   const { resolvedTheme, setTheme } = useTheme()
 

@@ -81,3 +81,14 @@ Commits must follow Conventional Commits formatting:
 1. **Approach Ambiguity**: When multiple architectural paths exist, STOP and present the trade-offs before writing code.
 2. **Breaking Changes**: Always warn and get confirmation before altering database schemas, authentication routes, or API contracts.
 3. **Targeted Diffs**: Keep code modifications scoped strictly to the task at hand. Avoid unrelated refactoring.
+
+---
+
+## 6. Implementing Features from Reference Diffs
+
+When user requests include historical commit diffs for new features:
+
+1. **Reference, Not Copy-Paste**: Diffs demonstrate functional intent and scope from an earlier version. Never replicate outdated patterns, older package versions, or legacy component structures blindly.
+2. **Consult Skills & Docs First**: Before writing any code, discover and review relevant skills in `.agents/skills/` (e.g., `tiptap`, `shadcn`, `eslint`) and read the relevant guide in `docs/` (`docs/editor-tiptap.md`, `docs/nextjs-react-conventions.md`, `docs/realtime-collaboration.md`).
+3. **Canonical Component & Symbol Naming**: Always use the canonical names defined in `docs/` (e.g., `DocumentEditor` instead of generic `Editor` which shadows Tiptap's core class).
+4. **Modern Framework Adaptation**: Ensure code conforms to React 19 standards (Server vs. Client components, explicit props interfaces, function declarations) and Next.js 16 standards (awaiting dynamic route `params`).

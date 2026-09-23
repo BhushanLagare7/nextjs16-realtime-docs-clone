@@ -20,6 +20,11 @@ You MUST adhere to these critical rules across all tasks without exception:
 3. **Strict Type Safety**: Zero `any` policy. Never use `@ts-ignore` or `@ts-nocheck`. Fix underlying types.
 4. **Protected Files**: NEVER modify `.env.local`, `next.config.ts`, `tsconfig.json`, `.gitignore`, `postcss.config.mjs`, or `components.json` without explicit user instruction.
 5. **Tiptap Node Attributes**: Never apply block attributes (e.g., `lineHeight`, `textAlign`) to inline text nodes.
+6. **Reference Diffs as Intent, Not Ground Truth**: Historical diffs provided by the user represent past implementations with older packages and conventions — NEVER follow them blindly. Always:
+   - Check available skills in `.agents/skills/` and domain documentation in `docs/` before implementing.
+   - Adhere strictly to canonical naming conventions and architecture contracts documented in `docs/` (e.g., `DocumentEditor` with `documentId` prop, never generic names like `Editor`).
+   - Implement using the latest package versions and modern industry-standard coding practices adapted for Next.js 16 and React 19.
+7. **Strict Design Tokens & Zero Hardcoded Colors Policy**: Never use hardcoded hex values (e.g., `#FAFBFD`, `#C7C7C7`, `#ffffff`), RGB/HSL, or raw Tailwind color utility classes (e.g., `bg-white`, `text-black`, `text-blue-500`, `dark:bg-zinc-900`) for component, canvas, or layout styling. All surfaces, text, borders, and controls MUST strictly use established semantic design tokens or theme CSS variables (`bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `bg-muted`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-secondary`, etc.). Custom surface colors must be registered as semantic theme tokens in `app/globals.css` with both `:root` (light) and `.dark` (dark) OKLCH definitions.
 
 ---
 
@@ -27,15 +32,16 @@ You MUST adhere to these critical rules across all tasks without exception:
 
 Detailed architecture guides and conventions have been modularized in the `docs/` directory to save context tokens. **Read the relevant document before writing code in that domain:**
 
-| Topic                     | Document                                                               | When to Consult                                                                                 |
-| :------------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **Architecture & Stack**  | [`docs/architecture.md`](docs/architecture.md)                         | High-level system design, tech stack versions, directory layout, or client/server boundaries    |
-| **Code Style & Types**    | [`docs/code-conventions.md`](docs/code-conventions.md)                 | ESLint 7-group import sorting, JSX prop ordering, Prettier, TypeScript strictness, or `cn()`    |
-| **Next.js 16 & React 19** | [`docs/nextjs-react-conventions.md`](docs/nextjs-react-conventions.md) | App Router pages/layouts, async params, Server vs Client components, or React 19 hooks/actions  |
-| **Editor & Tiptap**       | [`docs/editor-tiptap.md`](docs/editor-tiptap.md)                       | Tiptap extensions, ProseMirror schema, toolbar controls, ruler math, or custom marks/extensions |
-| **Multiplayer Realtime**  | [`docs/realtime-collaboration.md`](docs/realtime-collaboration.md)     | Liveblocks room setup, presence cursors, `/api/liveblocks-auth`, or comment threads             |
-| **Database & Backend**    | [`docs/database-conventions.md`](docs/database-conventions.md)         | Convex schema, reactive queries (`useQuery`), mutations (`useMutation`), or multi-tenancy rules |
-| **Development & Git**     | [`docs/development-workflow.md`](docs/development-workflow.md)         | Running dev/lint scripts, verification steps, conventional commit formatting, or boundaries     |
+| Topic                      | Document                                                               | When to Consult                                                                                    |
+| :------------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| **Architecture & Stack**   | [`docs/architecture.md`](docs/architecture.md)                         | High-level system design, tech stack versions, directory layout, or client/server boundaries       |
+| **Code Style & Types**     | [`docs/code-conventions.md`](docs/code-conventions.md)                 | ESLint 7-group import sorting, JSX prop ordering, Prettier, TypeScript strictness, or `cn()`       |
+| **Next.js 16 & React 19**  | [`docs/nextjs-react-conventions.md`](docs/nextjs-react-conventions.md) | App Router pages/layouts, async params, Server vs Client components, or React 19 hooks/actions     |
+| **Editor & Tiptap**        | [`docs/editor-tiptap.md`](docs/editor-tiptap.md)                       | Tiptap extensions, ProseMirror schema, toolbar controls, ruler math, or custom marks/extensions    |
+| **Multiplayer Realtime**   | [`docs/realtime-collaboration.md`](docs/realtime-collaboration.md)     | Liveblocks room setup, presence cursors, `/api/liveblocks-auth`, or comment threads                |
+| **Database & Backend**     | [`docs/database-conventions.md`](docs/database-conventions.md)         | Convex schema, reactive queries (`useQuery`), mutations (`useMutation`), or multi-tenancy rules    |
+| **Theming & Color System** | [`docs/theming.md`](docs/theming.md)                                   | Light, dark, system theme architecture, OKLCH tokens, Tiptap canvas theming, Liveblocks/Clerk sync |
+| **Development & Git**      | [`docs/development-workflow.md`](docs/development-workflow.md)         | Running dev/lint scripts, verification steps, conventional commit formatting, or boundaries        |
 
 ---
 

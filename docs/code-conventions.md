@@ -138,6 +138,10 @@ Enforced by ESLint rule `react/jsx-sort-props`:
 3. **No Arbitrary Inline Styles**:
    - Never use `style={{ color: "red" }}`. Use Tailwind utility classes.
    - Inline styles are permitted **only** for dynamically calculated coordinates or measurements (e.g. ruler positioning, drag-and-drop handles, custom margins in pixels).
+4. **Zero Hardcoded Colors Policy**:
+   - Never use hardcoded hex values (e.g., `#FAFBFD`, `#C7C7C7`, `#ffffff`), RGB/HSL, or raw Tailwind color utility classes (e.g., `bg-white`, `text-black`, `text-blue-500`, `dark:bg-zinc-900`).
+   - All styling must strictly utilize established semantic tokens or theme CSS variables (`bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `bg-muted`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-secondary`, etc.).
+   - Full theming architecture and token pairing rules are documented in [`docs/theming.md`](theming.md).
 
 ---
 
