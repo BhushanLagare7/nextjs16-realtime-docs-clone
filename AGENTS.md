@@ -41,4 +41,4 @@ Detailed architecture guides and conventions have been modularized in the `docs/
 
 ## Skills Reference
 
-Specialized agent skills are auto-discovered from `.agents/skills/`. Consult the relevant skill before implementing complex workflows (e.g. `shadcn`, `eslint`, `migrate-radix-to-base`).
+Specialized agent skills are auto-discovered from `.agents/skills/`. Consult the relevant skill before implementing complex workflows (e.g. `shadcn`, `eslint`, `migrate-radix-to-base`, `sync-docs`).
