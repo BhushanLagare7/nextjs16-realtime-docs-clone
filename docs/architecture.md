@@ -45,7 +45,7 @@ The application is a full-featured, collaborative document editor (inspired by G
 
 - **Tailwind CSS**: `^4` (configured with `@tailwindcss/postcss`)
 - **shadcn/ui**: Accessible component library built on Radix UI primitives
-- **Lucide React**: Primary UI icon library
+- **Lucide React** & **React Icons**: Primary icon libraries (`lucide-react` for standard UI chrome, `react-icons` for specialized format/caret icons like `BsFilePdf`, `FaCaretDown`)
 - **Class Variance Authority (`cva`)** & **`tailwind-merge`**: Component variants and className composition
 
 ### Document Editor & Extensions
@@ -91,7 +91,7 @@ nextjs16-realtime-docs-clone/
 │   ├── api/
 │   │   └── liveblocks-auth/# Liveblocks authentication endpoint
 │   ├── documents/
-│   │   └── [documentId]/   # Document editor workspace, toolbar, ruler, room
+│   │   └── [documentId]/   # Document editor workspace, navbar, toolbar, ruler, room
 │   ├── globals.css         # Global styles and Tailwind v4 theme definitions
 │   └── layout.tsx          # Root layout with font and theme providers
 ├── components/             # Reusable UI components
