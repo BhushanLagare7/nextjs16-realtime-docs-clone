@@ -8,7 +8,6 @@ import {
   ItalicIcon,
   ListTodoIcon,
   type LucideIcon,
-  MessageSquarePlusIcon,
   PrinterIcon,
   Redo2Icon,
   RemoveFormattingIcon,
@@ -123,7 +122,7 @@ function HeadingLevelButton() {
                 if (value === 0) {
                   editor?.chain().focus().setParagraph().run()
                 } else {
-                  editor?.chain().focus().toggleHeading({ level: value }).run()
+                  editor?.chain().focus().setHeading({ level: value }).run()
                 }
               }}
             >
@@ -346,12 +345,6 @@ export function Toolbar() {
       },
     ],
     [
-      {
-        label: "Comment",
-        icon: MessageSquarePlusIcon,
-        onClick: () => console.log("TODO: Comment"),
-        isActive: false, // TODO: Enable this functionality
-      },
       {
         label: "List Todo",
         icon: ListTodoIcon,

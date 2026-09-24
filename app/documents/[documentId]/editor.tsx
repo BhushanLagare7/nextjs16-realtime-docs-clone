@@ -13,7 +13,6 @@ import {
 import TaskItem from "@tiptap/extension-task-item"
 import TaskList from "@tiptap/extension-task-list"
 import { TextStyle } from "@tiptap/extension-text-style"
-import Underline from "@tiptap/extension-underline"
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 
@@ -79,7 +78,6 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
       Highlight.configure({
         multicolor: true,
       }),
-      Underline,
       // Enables resizable inline images
       Image.configure({
         resize: {

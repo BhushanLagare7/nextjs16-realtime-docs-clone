@@ -181,7 +181,7 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
   return (
     // Workspace Viewport: bg-muted/40 adapts cleanly between light & dark
     <div className="size-full overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
-      <div className="mx-auto flex w-[816px] min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
+      <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
       </div>
     </div>

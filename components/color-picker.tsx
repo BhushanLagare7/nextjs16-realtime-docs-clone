@@ -5,6 +5,7 @@ import { HexColorInput, HexColorPicker } from "react-colorful"
 
 import { CheckIcon, PlusIcon, XIcon } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   Popover,
   PopoverContent,
@@ -167,6 +168,15 @@ export function ColorPicker({
     ? normalizedCurrent
     : "#000000"
 
+  const [draftColor, setDraftColor] = React.useState(safeCustomColor)
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setDraftColor(safeCustomColor)
+    }
+    setOpen(nextOpen)
+  }
+
   const handleSwatchSelect = (color: string) => {
     onChange(color)
     setOpen(false)
@@ -178,7 +188,7 @@ export function ColorPicker({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
         align="start"
@@ -261,11 +271,11 @@ export function ColorPicker({
 
           {isCustomOpen && (
             <div className="custom-color-picker flex flex-col gap-2.5 pt-1">
-              <HexColorPicker color={safeCustomColor} onChange={onChange} />
+              <HexColorPicker color={draftColor} onChange={setDraftColor} />
               <div className="flex items-center gap-2">
                 <div
                   className="size-7 shrink-0 rounded-md border border-border"
-                  style={{ backgroundColor: safeCustomColor }}
+                  style={{ backgroundColor: draftColor }}
                 />
                 <div className="flex flex-1 items-center rounded-md border border-input bg-transparent px-2 focus-within:ring-1 focus-within:ring-ring">
                   <span className="text-xs text-muted-foreground select-none">
@@ -273,10 +283,17 @@ export function ColorPicker({
                   </span>
                   <HexColorInput
                     className="h-7 w-full bg-transparent px-1 font-mono text-xs text-foreground uppercase focus:outline-hidden"
-                    color={safeCustomColor}
-                    onChange={onChange}
+                    color={draftColor}
+                    onChange={setDraftColor}
                   />
                 </div>
+                <Button
+                  size="sm"
+                  type="button"
+                  onClick={() => handleSwatchSelect(draftColor)}
+                >
+                  Apply
+                </Button>
               </div>
             </div>
           )}
