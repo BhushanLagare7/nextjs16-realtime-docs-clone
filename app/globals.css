@@ -129,6 +129,15 @@
 }
 
 .tiptap {
+  /* Link styles */
+  a {
+    @apply cursor-pointer text-primary underline underline-offset-3;
+
+    &:hover {
+      @apply text-primary/80;
+    }
+  }
+
   /* Image-specific styling */
   img {
     @apply my-6 block h-auto max-w-full;

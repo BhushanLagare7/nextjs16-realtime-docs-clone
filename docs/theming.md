@@ -218,6 +218,18 @@ All internal document elements rendered by ProseMirror must utilize semantic CSS
     color: var(--card-foreground);
   }
 
+  /* Hyperlinks */
+  & a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
   /* Blockquotes */
   & blockquote {
     border-left: 3px solid var(--primary);
