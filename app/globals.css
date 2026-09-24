@@ -252,3 +252,22 @@
     }
   }
 }
+
+/* Custom react-colorful adjustments inside popovers */
+.custom-color-picker {
+  .react-colorful {
+    @apply h-32.5 w-full;
+  }
+
+  .react-colorful__saturation {
+    @apply rounded-t-[calc(var(--radius)-2px)];
+  }
+
+  .react-colorful__last-control {
+    @apply mt-1.5 h-3.5 rounded-b-[calc(var(--radius)-2px)];
+  }
+
+  .react-colorful__pointer {
+    @apply size-4;
+  }
+}

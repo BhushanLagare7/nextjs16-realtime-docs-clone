@@ -1,5 +1,8 @@
 "use client"
 
+import { Color } from "@tiptap/extension-color"
+import { FontFamily } from "@tiptap/extension-font-family"
+import { Highlight } from "@tiptap/extension-highlight"
 import Image from "@tiptap/extension-image"
 import {
   Table,
@@ -9,6 +12,8 @@ import {
 } from "@tiptap/extension-table"
 import TaskItem from "@tiptap/extension-task-item"
 import TaskList from "@tiptap/extension-task-list"
+import { TextStyle } from "@tiptap/extension-text-style"
+import Underline from "@tiptap/extension-underline"
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 
@@ -68,6 +73,13 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     },
     extensions: [
       StarterKit,
+      FontFamily,
+      TextStyle,
+      Color,
+      Highlight.configure({
+        multicolor: true,
+      }),
+      Underline,
       // Enables resizable inline images
       Image.configure({
         resize: {
