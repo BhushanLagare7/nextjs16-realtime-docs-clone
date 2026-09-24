@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { type Level } from "@tiptap/extension-heading"
 import {
@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { MAX_FONT_SIZE, MIN_FONT_SIZE } from "@/extensions/font-size"
 import { cn } from "@/lib/utils"
 import { useEditorStore } from "@/store/use-editor-store"
 
@@ -183,11 +184,18 @@ function FontSizeButton() {
   }
 
   const updateFontSize = (newSize: string) => {
-    const size = parseInt(newSize, 10)
-    if (!isNaN(size) && size > 0) {
+    const trimmed = newSize.trim()
+    if (!/^\d+$/.test(trimmed)) {
+      setInputValue(fontSize)
+      setIsEditing(false)
+      return
+    }
+
+    const size = parseInt(trimmed, 10)
+    if (size >= MIN_FONT_SIZE && size <= MAX_FONT_SIZE) {
       editor?.chain().focus().setFontSize(`${size}px`).run()
-      setFontSize(newSize)
-      setInputValue(newSize)
+      setFontSize(size.toString())
+      setInputValue(size.toString())
       setIsEditing(false)
     } else {
       setInputValue(fontSize)
@@ -213,12 +221,14 @@ function FontSizeButton() {
 
   const increment = () => {
     const newSize = parseInt(fontSize, 10) + 1
-    updateFontSize(newSize.toString())
+    if (newSize <= MAX_FONT_SIZE) {
+      updateFontSize(newSize.toString())
+    }
   }
 
   const decrement = () => {
     const newSize = parseInt(fontSize, 10) - 1
-    if (newSize > 0) {
+    if (newSize >= MIN_FONT_SIZE) {
       updateFontSize(newSize.toString())
     }
   }
@@ -425,6 +435,7 @@ function ImageButton() {
   const { editor } = useEditorStore()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
+  const imageButtonRef = useRef<HTMLButtonElement | null>(null)
 
   const onChange = (src: string) => {
     editor?.chain().focus().setImage({ src }).run()
@@ -459,6 +470,7 @@ function ImageButton() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
+            ref={imageButtonRef}
             aria-label="Insert image"
             className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
           >
@@ -492,7 +504,13 @@ function ImageButton() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          onCloseAutoFocus={(e) => {
+            e.preventDefault()
+            imageButtonRef.current?.focus()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Insert image URL</DialogTitle>
             <DialogDescription className="sr-only">
@@ -527,10 +545,30 @@ function LinkButton() {
   const [open, setOpen] = useState(false)
 
   const onChange = (href: string) => {
-    if (href.trim() === "") {
+    const trimmedHref = href.trim()
+
+    if (trimmedHref === "") {
       editor?.chain().focus().extendMarkRange("link").unsetLink().run()
     } else {
-      editor?.chain().focus().extendMarkRange("link").setLink({ href }).run()
+      let normalizedHref = trimmedHref
+      const hasProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmedHref)
+      const isRelative =
+        trimmedHref.startsWith("/") ||
+        trimmedHref.startsWith("#") ||
+        trimmedHref.startsWith(".") ||
+        trimmedHref.startsWith("?") ||
+        trimmedHref.startsWith("//")
+
+      if (!hasProtocol && !isRelative) {
+        normalizedHref = `https://${trimmedHref}`
+      }
+
+      editor
+        ?.chain()
+        .focus()
+        .extendMarkRange("link")
+        .setLink({ href: normalizedHref })
+        .run()
     }
     setValue("")
     setOpen(false)

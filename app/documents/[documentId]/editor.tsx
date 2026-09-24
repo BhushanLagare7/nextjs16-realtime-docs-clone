@@ -75,7 +75,9 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
       },
     },
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: false,
+      }),
       LineHeightExtension,
       FontSizeExtension,
       TextAlign.configure({
