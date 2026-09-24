@@ -52,8 +52,9 @@ The application is a full-featured, collaborative document editor (inspired by G
 
 - **Tiptap**: `^3.x` (Headless rich-text editor engine)
   - `@tiptap/react`, `@tiptap/starter-kit`
-  - Specialized extensions: `Heading`, `Highlight`, `Image`, `Table`, `TextAlign`, `TextStyle`
-  - Custom extensions: Font family, font size, line height, image resizer
+  - Core & specialized extensions: `StarterKit` (bundles `Bold`, `Italic`, `Underline`, `Strike`, `Heading`, etc.), `Color`, `FontFamily`, `Highlight`, `Image`, `Table`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem`, `TaskList`, `TextStyle`
+  - Custom extensions: Font size, line height, image resizer
+- **Color Picker**: `react-colorful` (`HexColorPicker`, `HexColorInput`) integrated into Google Docs 80-swatch matrix popover
 
 ### Real-Time Multiplayer Collaboration
 

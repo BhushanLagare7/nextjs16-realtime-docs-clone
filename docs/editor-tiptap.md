@@ -11,7 +11,7 @@ The document editor is powered by Tiptap v3. It integrates with ProseMirror unde
 - **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`. Always set `immediatelyRender: false` in Next.js App Router to avoid React 19 SSR hydration mismatch warnings.
 - **Canonical Component & Exports**: The core document editor component is named `DocumentEditor` located at `app/documents/[documentId]/editor.tsx` and accepts `DocumentEditorProps` (`{ documentId?: string }`). An alias export `export { DocumentEditor as Editor }` is provided for backwards compatibility.
 - **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) via `useEditor` lifecycle callbacks (`onCreate`, `onDestroy`, `onUpdate`, `onSelectionUpdate`, `onTransaction`, `onFocus`, `onBlur`, `onContentError`) so toolbar controls can execute commands and react to editor state changes.
-- **Core Extensions Configuration**: Standard editor extensions include `StarterKit`, `Image.configure({ resize: { enabled: true } })`, `Table.configure({ resizable: true })`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem.configure({ nested: true })`, and `TaskList`.
+- **Core Extensions Configuration**: Standard editor extensions include `StarterKit` (which bundles `Underline`, `Bold`, `Italic`, `Strike`, etc. by default in Tiptap v3), `FontFamily`, `TextStyle`, `Color`, `Highlight.configure({ multicolor: true })`, `Image.configure({ resize: { enabled: true } })`, `Table.configure({ resizable: true })`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem.configure({ nested: true })`, and `TaskList`. Do not register standalone `Underline` alongside default `StarterKit` to avoid duplicate extension warnings.
 - **Native Image Resizing (Tiptap v3)**: Tiptap v3 incorporates resizable node views directly in `@tiptap/extension-image` via `Image.configure({ resize: { enabled: true } })`. Never register third-party extensions (e.g. `tiptap-extension-resize-image`) alongside `@tiptap/extension-image`, as duplicate node definitions cause editor warnings and inconsistent image parsing.
 - **Content Persistence**: Content state is synchronized collaboratively with Liveblocks via `@liveblocks/react-tiptap`.
 
@@ -196,3 +196,27 @@ export function Toolbar() {
   )
 }
 ```
+
+### 5.1 Toolbar Dropdown Selectors Pattern
+
+Dropdown selectors in the toolbar (e.g. `FontFamilyButton`, `HeadingLevelButton`) adhere to strict sizing and layout standards:
+
+1. **Trigger Anti-Jitter Layout**:
+   - Always define explicit fixed widths (e.g., `w-28` or `w-30`) with `justify-between` and `overflow-hidden` for text dropdown triggers.
+   - Never use dynamic widths (`min-w-7 justify-center`), as changing active options (e.g., `"Normal text"` vs `"Heading 1"`) causes layout shifts (jitter) across subsequent toolbar controls.
+2. **Popover Content Width & Single-Line Text**:
+   - `components/ui/dropdown-menu.tsx` defaults to `w-(--radix-dropdown-menu-trigger-width) min-w-32`. On triggers narrower than option labels, this forces multi-word options (e.g., `"Times New Roman"`) to wrap across lines.
+   - Always override on `<DropdownMenuContent>` with `w-auto min-w-48` and add `whitespace-nowrap` to option labels to guarantee single-line rendering.
+3. **Tiptap v3 Named Imports**:
+   - Tiptap v3 packages `@tiptap/extension-text-style`, `@tiptap/extension-font-family`, `@tiptap/extension-color`, and `@tiptap/extension-highlight` expose named exports (`import { TextStyle }`, `import { FontFamily }`, `import { Color }`, `import { Highlight }`). Never use default imports.
+4. **Color & Highlight Picker Popovers**:
+   - `TextColorButton` and `HighlightColorButton` render the custom `ColorPicker` popover (`components/color-picker.tsx`), powered by Radix UI `Popover` and `react-colorful`.
+   - Displays a standard 80-color Google Docs swatch matrix, a theme-aware reset option (`Default` / `unsetColor()` for text; `None` / `unsetHighlight()` for highlight), and a collapsible custom spectrum picker with hex input.
+   - Text color updates via `editor.chain().focus().setColor(color).run()` on the `textStyle` mark.
+   - Highlight color updates via `editor.chain().focus().setHighlight({ color }).run()` on the `highlight` mark.
+   - Buttons provide explicit `aria-label` attributes (`"Text color"`, `"Highlight color"`) and adhere to semantic tokens (`text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`).
+5. **Heading Level Idempotency**:
+   - In heading dropdown selectors, always execute `editor.chain().focus().setHeading({ level }).run()` instead of `toggleHeading({ level })`. Selecting an already-active level in a selection menu must keep the block at that heading level instead of reverting it back to a normal paragraph.
+6. **Local Draft State for Custom Pickers**:
+   - Custom spectrum pickers (`HexColorPicker` and `HexColorInput`) inside popovers must bind to a local draft state (`draftColor`) initialized from `safeCustomColor` on `onOpenChange`.
+   - Edits are committed only via an explicit user action (e.g., an "Apply" button invoking `handleSwatchSelect(draftColor)`), preventing unwanted editor transactions and state churn while dragging the spectrum picker or typing incomplete hex values.

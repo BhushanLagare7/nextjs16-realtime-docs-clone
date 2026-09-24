@@ -144,6 +144,7 @@ Enforced by ESLint rule `react/jsx-sort-props`:
    - **Exceptions**:
      - Collaborator cursor labels (`.collaboration-cursor__label`) may use fixed white text (`#ffffff`) for contrast against saturated collaborator colors.
      - Document canvas print styles may use `print:bg-white` and `print:text-black` to guarantee standard physical paper output regardless of the active screen theme.
+     - User-authored document text/highlight marks and color picker palette matrices (`GOOGLE_DOCS_PALETTE`) representing arbitrary user content or input values (not UI component chrome or layout surfaces).
    - Full theming architecture and token pairing rules are documented in [`docs/theming.md`](theming.md).
 
 ---

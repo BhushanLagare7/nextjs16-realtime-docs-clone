@@ -53,6 +53,8 @@ The application implements a **tri-theme model** supporting:
 3. **Print Media Isolation**:
    - The document canvas MUST print strictly in paper white with black ink regardless of whether the user is actively viewing in dark or light mode (`print:bg-white print:text-black print:border-none print:shadow-none`).
    - Print utilities (`print:bg-white` and `print:text-black`) are explicitly permitted as an exception to the raw-color restriction to ensure physical paper output remains white with black text.
+4. **User-Authored Document Formatting & Swatch Matrices**:
+   - Color hex values applied to user document text or highlights (`textStyle`, `highlight`), along with color palette swatch matrices (`GOOGLE_DOCS_PALETTE` in `components/color-picker.tsx`), represent user-authored content and input values rather than component chrome or layout surfaces. They are explicitly permitted as content exceptions to the raw color restriction.
 
 ---
 
@@ -179,7 +181,7 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
   return (
     // Workspace Viewport: bg-muted/40 adapts cleanly between light & dark
     <div className="size-full overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
-      <div className="mx-auto flex w-[816px] min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
+      <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
       </div>
     </div>
@@ -377,6 +379,19 @@ The horizontal ruler must seamlessly integrate into both light and dark document
   - Inactive: `text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`.
   - Active: `bg-muted-foreground/20`.
   - Disabled: `disabled:opacity-40 disabled:pointer-events-none`.
+
+### Dropdown Menus & Popovers (`components/ui/dropdown-menu.tsx`, `components/ui/popover.tsx`)
+
+- **Surfaces & Text**: Styled with `bg-popover text-popover-foreground`.
+- **Borders & Shadows**: Elevated with `ring-1 ring-foreground/10 shadow-lg` (or `shadow-md`).
+- **Interactive Items**: Use `focus:bg-accent focus:text-accent-foreground` with selection indicators.
+
+### Color & Highlight Picker Popover (`components/color-picker.tsx`)
+
+- **Popover Container**: `w-60.5 p-2.5 bg-popover text-popover-foreground`.
+- **Palette Swatches**: `size-4.5 rounded-full border border-border/40 hover:scale-125 focus-visible:outline-ring/50`. Selected swatch uses `ring-2 ring-primary ring-offset-1 ring-offset-popover`.
+- **Reset Option**: Semantic button (`Default` / `None`) styled with `text-foreground hover:bg-muted focus-visible:outline-ring/50` and active state `bg-muted font-medium`.
+- **Custom Spectrum Picker (`react-colorful` in `app/globals.css`)**: Scoped rules under `.custom-color-picker` conform third-party controls to theme radius tokens (`rounded-t-[calc(var(--radius)-2px)]`, `rounded-b-[calc(var(--radius)-2px)]`).
 
 ---
 
