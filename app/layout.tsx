@@ -3,6 +3,8 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 
+import { NuqsAdapter } from "nuqs/adapters/next/app"
+
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
@@ -77,7 +79,9 @@ export default function RootLayout({
       suppressHydrationWarning // Avoids mismatch warnings from next-themes
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <NuqsAdapter>{children}</NuqsAdapter>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 517">
+  <style>
+    :root {
+      --canvas-bg: var(--card, #ffffff);
+      --canvas-border: var(--border, #e4e4e7);
+      --primary: #1D4ED8;
+    }
+
+    .canvas-bg { fill: var(--canvas-bg); }
+    .stroke-border { stroke: var(--canvas-border); }
+    .plus { fill: var(--primary); }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: var(--card, #202024);
+        --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+        --primary: #93C5FD;
+      }
+    }
+
+    :where(.dark, .dark *) {
+      --canvas-bg: var(--card, #202024);
+      --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+      --primary: #93C5FD;
+    }
+  </style>
+  <rect x="0.5" y="0.5" width="399" height="516" rx="2" class="canvas-bg stroke-border" stroke-width="1"/>
+  <!--Centered Plus Shape-->
+  <g transform="translate(100, 158.5) scale(2)">
+    <path d="M20 45 h25 v-25 h10 v25 h25 v10 h-25 v25 h-10 v-25 h-25 z" class="plus"/>
+  </g>
+</svg>

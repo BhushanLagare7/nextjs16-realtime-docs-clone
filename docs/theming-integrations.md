@@ -67,3 +67,47 @@ export function ClerkThemeProvider({
   )
 }
 ```
+
+---
+
+## 3. Static SVG Artwork & Illustration Theming
+
+Standalone SVG illustrations (e.g. template thumbnails in `public/*.svg`) loaded via `<img>` or CSS `background-image: url(...)` run in an isolated document context:
+
+- **Isolation Constraint**: Host-page theme classes (e.g., `.dark` on `<html>`) and CSS variables do not affect SVGs loaded via `<img>` or `background-image`. Selectors like `:where(.dark, .dark *)` only work when `.dark` is present inside the SVG document itself.
+- **Recommended Approach**: For app-controlled theming (e.g., toggled via `next-themes`), use **inline SVG** components or **theme-selected assets** (e.g., swapping asset URLs based on `resolvedTheme`).
+- **Internal `<style>` Block**: For external SVGs adapting to OS preferences, use `@media (prefers-color-scheme: dark)`:
+  ```xml
+  <style>
+    :root {
+      --canvas-bg: var(--card, #ffffff);
+      --canvas-border: var(--border, #e4e4e7);
+      --text-foreground: var(--card-foreground, #18181b);
+      --text-muted: var(--muted-foreground, #71717a);
+      --primary: #1D4ED8;
+    }
+    .canvas-bg { fill: var(--canvas-bg); }
+    .stroke-border { stroke: var(--canvas-border); }
+    .text-foreground { fill: var(--text-foreground); }
+    .text-muted { fill: var(--text-muted); }
+    .primary { fill: var(--primary); }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: var(--card, #202024);
+        --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+        --text-foreground: var(--card-foreground, #fafafa);
+        --text-muted: var(--muted-foreground, #a1a1aa);
+        --primary: #93C5FD;
+      }
+    }
+    :where(.dark, .dark *) {
+      --canvas-bg: var(--card, #202024);
+      --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+      --text-foreground: var(--card-foreground, #fafafa);
+      --text-muted: var(--muted-foreground, #a1a1aa);
+      --primary: #93C5FD;
+    }
+  </style>
+  ```
+- **Contrast Adjustments**: In dark mode, soften primary brand accents (e.g., `#93C5FD` vs light mode `#1D4ED8`) to preserve legibility and prevent eye strain.

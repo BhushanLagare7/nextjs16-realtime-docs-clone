@@ -45,6 +45,7 @@ The application is a full-featured, collaborative document editor (inspired by G
 
 - **Tailwind CSS**: `^4` (configured with `@tailwindcss/postcss`)
 - **shadcn/ui**: Accessible component library built on Radix UI primitives
+- **Embla Carousel**: `embla-carousel-react` (`^8.x`) powering template gallery carousel interactions
 - **Lucide React** & **React Icons**: Primary icon libraries (`lucide-react` for standard UI chrome, `react-icons` for specialized format/caret icons like `BsFilePdf`, `FaCaretDown`)
 - **Class Variance Authority (`cva`)** & **`tailwind-merge`**: Component variants and className composition
 

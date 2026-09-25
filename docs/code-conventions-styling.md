@@ -31,7 +31,7 @@ This document establishes the styling standards, Tailwind CSS v4 class merging r
    - For components with multiple variants or sizes, use `class-variance-authority` (`cva`).
 3. **No Arbitrary Inline Styles**:
    - Never use `style={{ color: "red" }}`. Use Tailwind utility classes.
-   - Inline styles are permitted **only** for dynamically calculated coordinates or measurements (e.g. ruler positioning, drag-and-drop handles, custom margins in pixels).
+   - Inline styles are permitted **only** for dynamically calculated coordinates or measurements (e.g. ruler positioning, drag-and-drop handles, custom margins in pixels) or dynamic asset background images (`style={{ backgroundImage: `url(${imageUrl})` }}`).
 4. **Zero Hardcoded Colors Policy**:
    - Never use hardcoded hex values (e.g., `#FAFBFD`, `#C7C7C7`, `#ffffff`), RGB/HSL, or raw Tailwind color utility classes (e.g., `bg-white`, `text-black`, `text-blue-500`, `dark:bg-zinc-900`).
    - All styling must strictly utilize established semantic tokens or theme CSS variables (`bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `bg-muted`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-secondary`, etc.).
