@@ -52,17 +52,16 @@ Import sorting is strictly enforced via `eslint-plugin-simple-import-sort` in `e
 Enforced by ESLint rule `react/jsx-sort-props`:
 
 1. **Reserved props first**: `key`, `ref`.
-2. **Shorthand / Boolean attributes**: `disabled`, `autoFocus`.
-3. **Alphabetical standard props**: `className`, `id`, `size`, `variant`.
-4. **Callbacks last**: `onBlur`, `onChange`, `onClick`, `onKeyDown`.
+2. **Alphabetical standard & shorthand props**: `className`, `disabled`, `id`, `size`, `variant` (shorthand and boolean attributes are alphabetized together with other non-callback props).
+3. **Callbacks last**: `onBlur`, `onChange`, `onClick`, `onKeyDown`.
 
 ```tsx
 // ✅ Correct JSX Prop Order
 <Button
   key={tool.id}
   ref={buttonRef}
-  disabled={!editor}
   className="h-7 min-w-7 p-1"
+  disabled={!editor}
   size="sm"
   variant={isActive ? "secondary" : "ghost"}
   onClick={() => executeCommand()}

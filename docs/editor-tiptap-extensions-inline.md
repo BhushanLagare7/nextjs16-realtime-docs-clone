@@ -24,6 +24,9 @@ declare module "@tiptap/core" {
   }
 }
 
+export const MIN_FONT_SIZE = 1
+export const MAX_FONT_SIZE = 100
+
 export const FontSizeExtension = Extension.create({
   name: "fontSize",
 

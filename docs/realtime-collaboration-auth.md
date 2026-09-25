@@ -9,7 +9,7 @@ This document details the server-side authentication route handler and multiplay
 Liveblocks room access is authorized server-side via a Next.js 16 route handler integrated with Clerk:
 
 1. **Session Verification**: Call `auth()` and `currentUser()` from `@clerk/nextjs/server`.
-2. **Access Control**: Verify user belongs to the document's organization or has shared access.
+2. **Access Control**: Authorize document owners (`isOwner`) or users whose active Clerk organization matches the document's organization (`isOrgMember`).
 3. **Session Identification**: Identify the user session on Liveblocks:
    ```typescript
    // app/api/liveblocks-auth/route.ts

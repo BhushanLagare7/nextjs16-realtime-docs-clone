@@ -19,7 +19,7 @@ In Tailwind CSS v4, dark mode is registered using the `@custom-variant` directiv
 @import "shadcn/tailwind.css";
 
 /* Enables class-based dark variant */
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -53,7 +53,7 @@ In Tailwind CSS v4, dark mode is registered using the `@custom-variant` directiv
 
 ### Semantic Token Pairing Matrix
 
-Every surface color follows the canonical `name` and `name-foreground` pairing to guarantee accessible WCAG AA/AAA contrast ratios:
+Every surface color follows the canonical `name` and `name-foreground` pairing to ensure accessible contrast for primary surface and foreground pairs (aiming for WCAG AA compliance across standard UI text):
 
 | Token Variable           | Tailwind Utility Class      | Intended Usage                              | Light Mode OKLCH            | Dark Mode OKLCH                    |
 | :----------------------- | :-------------------------- | :------------------------------------------ | :-------------------------- | :--------------------------------- |

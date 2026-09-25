@@ -26,6 +26,14 @@ With `@liveblocks/react-ui/styles/dark/attributes.css` loaded, all thread popove
 
 Clerk auth dialogs, user profiles, and organization switchers must dynamically match the active theme.
 
+### Pinned Dependencies
+
+To support `appearance.baseTheme` with Next.js 16 and React 19 without version incompatibility, install pinned Clerk dependencies:
+
+```bash
+npm install @clerk/nextjs@^6.12.0 @clerk/themes@^2.2.20
+```
+
 ### Dynamic `baseTheme` Binding
 
 ```tsx

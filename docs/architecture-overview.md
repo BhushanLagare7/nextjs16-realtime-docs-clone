@@ -70,7 +70,8 @@ The application is a full-featured, collaborative document editor (inspired by G
 
 ### Authentication & Multi-Tenancy
 
-- **Clerk**: User authentication, organization/workspace switching, and profile avatar sync
+- **Clerk**: `^6.x` (`@clerk/nextjs@^6.12.0`, `@clerk/themes@^2.2.20`)
+  - User authentication, organization/workspace switching, and profile avatar sync
 
 ### State Management & URL Coordination
 

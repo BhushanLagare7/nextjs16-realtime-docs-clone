@@ -22,9 +22,11 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        style: `padding-left: ${leftMargin}px; padding-right: ${rightMargin}px;`,
+        // Expose dynamic margins via CSS variables so stylesheet utilities (print:p-0) can override them
+        style: `--page-margin-left: ${leftMargin}px; --page-margin-right: ${rightMargin}px;`,
         class: cn(
           "flex min-h-[1054px] w-[816px] cursor-text flex-col pt-10 pb-10 focus:outline-none",
+          "pr-[var(--page-margin-right)] pl-[var(--page-margin-left)]",
           // Theming: Uses semantic card surface on screen, strictly white on print
           "border border-border bg-card text-card-foreground shadow-xs",
           "print:border-none print:bg-white print:p-0 print:text-black print:shadow-none"
@@ -52,7 +54,7 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
 
 In real-time multiplayer sessions (via Liveblocks / Y.js):
 
-- **Collaborator Caret Flags**: Each collaborator is assigned a unique hue. Caret flags MUST display the collaborator's name pill with high-contrast text:
+- **Collaborator Caret Flags**: Each collaborator is assigned a unique hue from a palette constrained to dark/saturated tones (ensuring ≥ 4.5:1 contrast against white text). Caret flags MUST display the collaborator's name pill with high-contrast text:
   ```css
   .collaboration-cursor__caret {
     border-left: 2px solid var(--cursor-color);
@@ -66,7 +68,7 @@ In real-time multiplayer sessions (via Liveblocks / Y.js):
   .collaboration-cursor__label {
     background-color: var(--cursor-color);
     border-radius: 3px;
-    color: #ffffff; /* Explicit contrast against saturated cursor colors */
+    color: #ffffff; /* Contrast safeguard: --cursor-color must be constrained to a palette with >= 4.5:1 contrast against white text */
     font-size: 11px;
     font-weight: 600;
     left: -2px;

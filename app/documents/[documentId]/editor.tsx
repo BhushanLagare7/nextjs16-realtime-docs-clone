@@ -72,9 +72,9 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     editorProps: {
       attributes: {
         // Emulates a page-like editing surface (fixed width/height, print-friendly styles)
-        style: `padding-left: ${leftMargin ?? 56}px; padding-right: ${rightMargin ?? 56}px;`,
+        style: `--page-margin-left: ${leftMargin ?? 56}px; --page-margin-right: ${rightMargin ?? 56}px;`,
         class:
-          "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none",
+          "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 pl-[var(--page-margin-left,56px)] pr-[var(--page-margin-right,56px)] cursor-text print:bg-white print:text-black print:border-none print:p-0 print:shadow-none",
       },
     },
     extensions: [

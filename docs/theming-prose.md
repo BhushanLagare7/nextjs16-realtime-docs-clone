@@ -13,9 +13,7 @@ All internal document elements rendered by ProseMirror must utilize semantic CSS
 .tiptap {
   /* Selection Highlight */
   & ::selection {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-    opacity: 0.2;
+    background-color: color-mix(in oklch, var(--primary) 20%, transparent);
   }
 
   /* Headings & Text */
