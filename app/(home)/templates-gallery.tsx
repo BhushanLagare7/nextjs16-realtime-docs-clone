@@ -33,12 +33,11 @@ export function TemplatesGallery() {
                   <button
                     aria-label={template.label}
                     className="flex size-full flex-col items-center justify-center gap-y-4 rounded-sm border border-border bg-card bg-cover bg-center bg-no-repeat transition hover:border-primary hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                    disabled={isCreating}
+                    disabled
                     style={{
                       backgroundImage: `url(${template.imageUrl})`,
                     }}
                     type="button"
-                    onClick={() => {}}
                   />
                   <p className="truncate text-sm font-medium text-foreground">
                     {template.label}
