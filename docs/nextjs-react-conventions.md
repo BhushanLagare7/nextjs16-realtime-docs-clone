@@ -93,6 +93,7 @@ export default function DocumentPage({ params }: { params: { documentId: string 
 
 ## 4. Special Next.js App Router Files
 
+- **`proxy.ts`**: Next.js 16 file convention for middleware / request proxying (replaces legacy `middleware.ts`). Handles route interception, session validation, and Clerk auth auto-proxying.
 - **`layout.tsx`**: Defines the shared UI frame. Wraps children with providers (`ThemeProvider`, `NuqsAdapter`, `ConvexClientProvider`). Include `suppressHydrationWarning` on `<html lang="en">` to prevent attribute mismatch warnings when `next-themes` injects theme classes.
 - **`loading.tsx`**: Renders instant loading skeletons using React Suspense while server data resolves.
 - **`error.tsx`**: Error boundary catch-all for a route segment. **Must always include `"use client"`**.

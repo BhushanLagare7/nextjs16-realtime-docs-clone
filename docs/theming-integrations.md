@@ -24,48 +24,45 @@ With `@liveblocks/react-ui/styles/dark/attributes.css` loaded, all thread popove
 
 ## 2. Authentication Theming (`@clerk/nextjs` & `@clerk/themes`)
 
-Clerk auth dialogs, user profiles, and organization switchers must dynamically match the active theme.
+Clerk auth dialogs, user profiles, and organization switchers dynamically match the active theme and shadcn design system.
 
 ### Pinned Dependencies
 
-To support `appearance.baseTheme` with Next.js 16 and React 19 without version incompatibility, install pinned Clerk dependencies:
-
 ```bash
-npm install @clerk/nextjs@^6.12.0 @clerk/themes@^2.2.20
+npm install @clerk/nextjs @clerk/themes
 ```
 
-### Dynamic `baseTheme` Binding
+### Direct `shadcn` Theme Binding
+
+Clerk's official `shadcn` theme preset in `@clerk/themes` binds Clerk component styling directly to our semantic CSS variables (`var(--card)`, `var(--primary)`, `var(--muted)`, `var(--border)`, etc.):
 
 ```tsx
 "use client"
 
+import type { ReactNode } from "react"
 import { ClerkProvider } from "@clerk/nextjs"
-import { dark } from "@clerk/themes"
-import { useTheme } from "next-themes"
+import { shadcn } from "@clerk/themes"
 
-export function ClerkThemeProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const { resolvedTheme } = useTheme()
-
+export function ClerkThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: resolvedTheme === "dark" ? dark : undefined,
-        variables: {
-          colorPrimary:
-            resolvedTheme === "dark"
-              ? "oklch(0.922 0 0)" // Matches active dark primary token
-              : "oklch(0.205 0 0)", // Matches active light primary token
-        },
+        theme: shadcn,
       }}
     >
       {children}
     </ClerkProvider>
   )
 }
+```
+
+In `app/globals.css`, import the Tailwind scanner directive from `@clerk/themes`:
+
+```css
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@clerk/themes/shadcn.css";
 ```
 
 ---

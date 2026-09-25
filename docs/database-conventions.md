@@ -12,7 +12,9 @@ The backend uses Convex for reactive document metadata storage.
 - **Atomic Mutations**: State changes (create document, rename, delete) use `useMutation` with built-in optimistic updates and transactional safety.
 - **Type Safety**: Queries and mutations are strongly typed via generated API types (`@/convex/_generated/api`).
 - **Client Provider (`components/convex-client-provider.tsx`)**:
-  Wraps application children in `<ConvexProvider client={convex}>` with `new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)`. Integrated in root `app/layout.tsx`.
+  Wraps application children in `<ClerkProvider appearance={{ theme: shadcn }}>` and `<ConvexProviderWithClerk client={convex} useAuth={useAuth}>`. Gates access states (`<Authenticated>`, `<Unauthenticated>`, `<AuthLoading>`).
+- **Convex Auth Config (`convex/auth.config.ts`)**:
+  Configures the Clerk JWT issuer domain (`CLERK_JWT_ISSUER_DOMAIN`) and application ID (`convex`) for server-side token verification.
 - **Codegen Isolation**: `convex/_generated/` is generated automatically by `npx convex dev` and excluded from ESLint and Prettier.
 
 ---
