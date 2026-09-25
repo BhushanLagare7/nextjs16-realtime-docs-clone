@@ -17,7 +17,7 @@ This document establishes the local development workflows, npm scripts, verifica
 | `npm run format:check` | Verifies code formatting against Prettier and ESLint rules without modifying files. |
 | `npm run typecheck`    | Validates TypeScript types across the entire project (`tsc --noEmit`).              |
 | `npm test`             | Runs unit tests using `tsx --test`.                                                 |
-| `npx convex dev`       | Runs Convex local backend sync process and codegen watcher.                         |
+| `npx convex dev`       | Syncs code and generates types for the configured development deployment.           |
 
 ---
 
