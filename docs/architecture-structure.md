@@ -22,6 +22,7 @@ nextjs16-realtime-docs-clone/
 ├── components/             # Reusable UI components
 │   ├── toolbar/            # Document editor toolbar controls
 │   ├── ui/                 # shadcn/ui primitive components
+│   ├── convex-client-provider.tsx # Convex client provider
 │   └── theme-provider.tsx  # Next-themes provider
 ├── constants/              # Application-wide static constants (fonts, margins)
 ├── convex/                 # Convex backend schema, queries, mutations

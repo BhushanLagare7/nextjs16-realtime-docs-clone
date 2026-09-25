@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "generated/**",
+    "convex/_generated/**",
     "src/prisma/contract.d.ts",
     "src/prisma/contract.json",
     "migrations/**",

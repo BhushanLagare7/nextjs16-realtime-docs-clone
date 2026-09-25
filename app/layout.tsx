@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import { NuqsAdapter } from "nuqs/adapters/next/app"
 
+import { ConvexClientProvider } from "@/components/convex-client-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
@@ -80,7 +81,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <NuqsAdapter>{children}</NuqsAdapter>
+          <NuqsAdapter>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+          </NuqsAdapter>
         </ThemeProvider>
       </body>
     </html>
