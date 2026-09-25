@@ -4,13 +4,16 @@ This document outlines backend database conventions, schema definitions, reactiv
 
 ---
 
-## 1. Convex Architecture Overview
+## 1. Convex Architecture Overview & Client Setup
 
 The backend uses Convex for reactive document metadata storage.
 
-- **Realtime Subscriptions**: UI components use `useQuery` from `convex/react` to automatically re-render when data changes on the server.
+- **Realtime Subscriptions**: UI components use `useQuery` from `convex/react` to automatically re-render when data changes on the server. Returns `undefined` while loading.
 - **Atomic Mutations**: State changes (create document, rename, delete) use `useMutation` with built-in optimistic updates and transactional safety.
 - **Type Safety**: Queries and mutations are strongly typed via generated API types (`@/convex/_generated/api`).
+- **Client Provider (`components/convex-client-provider.tsx`)**:
+  Wraps application children in `<ConvexProvider client={convex}>` with `new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!)`. Integrated in root `app/layout.tsx`.
+- **Codegen Isolation**: `convex/_generated/` is generated automatically by `npx convex dev` and excluded from ESLint and Prettier.
 
 ---
 
@@ -28,7 +31,7 @@ export default defineSchema({
     title: v.string(),
     initialContent: v.optional(v.string()),
     ownerId: v.string(),
-    roomId: v.string(),
+    roomId: v.optional(v.string()),
     organizationId: v.optional(v.string()),
   })
     .index("by_owner_id", ["ownerId"])

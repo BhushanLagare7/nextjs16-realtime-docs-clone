@@ -45,6 +45,9 @@ Import sorting is strictly enforced via `eslint-plugin-simple-import-sort` in `e
 > [!TIP]
 > Do not sort imports manually. Run `npm run lint:fix` to sort them automatically.
 
+> [!NOTE]
+> Machine-generated files (e.g., `convex/_generated/**`, `next-env.d.ts`) are explicitly excluded from ESLint and Prettier formatting checks.
+
 ---
 
 ## 2. JSX Prop Ordering

@@ -17,6 +17,7 @@ This document establishes the local development workflows, npm scripts, verifica
 | `npm run format:check` | Verifies code formatting against Prettier and ESLint rules without modifying files. |
 | `npm run typecheck`    | Validates TypeScript types across the entire project (`tsc --noEmit`).              |
 | `npm test`             | Runs unit tests using `tsx --test`.                                                 |
+| `npx convex dev`       | Syncs code and generates types for the configured development deployment.           |
 
 ---
 
@@ -71,8 +72,8 @@ Commits must follow Conventional Commits formatting:
    - `.gitignore`: Git untracked files specification.
 2. **Environment Secrets**:
    - `.env.local`: Contains sensitive production or development keys. Never commit or overwrite.
-3. **Build Artifacts**:
-   - `.next/`, `node_modules/`, `tsconfig.tsbuildinfo`.
+3. **Build & Generated Artifacts**:
+   - `.next/`, `node_modules/`, `tsconfig.tsbuildinfo`, `convex/_generated/`.
 
 ---
 
