@@ -32,16 +32,32 @@ You MUST adhere to these critical rules across all tasks without exception:
 
 Detailed architecture guides and conventions have been modularized in the `docs/` directory to save context tokens. **Read the relevant document before writing code in that domain:**
 
-| Topic                      | Document                                                               | When to Consult                                                                                    |
-| :------------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
-| **Architecture & Stack**   | [`docs/architecture.md`](docs/architecture.md)                         | High-level system design, tech stack versions, directory layout, or client/server boundaries       |
-| **Code Style & Types**     | [`docs/code-conventions.md`](docs/code-conventions.md)                 | ESLint 7-group import sorting, JSX prop ordering, Prettier, TypeScript strictness, or `cn()`       |
-| **Next.js 16 & React 19**  | [`docs/nextjs-react-conventions.md`](docs/nextjs-react-conventions.md) | App Router pages/layouts, async params, Server vs Client components, or React 19 hooks/actions     |
-| **Editor & Tiptap**        | [`docs/editor-tiptap.md`](docs/editor-tiptap.md)                       | Tiptap extensions, ProseMirror schema, toolbar controls, ruler math, or custom marks/extensions    |
-| **Multiplayer Realtime**   | [`docs/realtime-collaboration.md`](docs/realtime-collaboration.md)     | Liveblocks room setup, presence cursors, `/api/liveblocks-auth`, or comment threads                |
-| **Database & Backend**     | [`docs/database-conventions.md`](docs/database-conventions.md)         | Convex schema, reactive queries (`useQuery`), mutations (`useMutation`), or multi-tenancy rules    |
-| **Theming & Color System** | [`docs/theming.md`](docs/theming.md)                                   | Light, dark, system theme architecture, OKLCH tokens, Tiptap canvas theming, Liveblocks/Clerk sync |
-| **Development & Git**      | [`docs/development-workflow.md`](docs/development-workflow.md)         | Running dev/lint scripts, verification steps, conventional commit formatting, or boundaries        |
+| Topic                                | Document                                                                             | When to Consult                                                                                 |
+| :----------------------------------- | :----------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| **Architecture Overview**            | [`docs/architecture-overview.md`](docs/architecture-overview.md)                     | High-level system design, architecture overview, and technology stack                           |
+| **Architecture Structure**           | [`docs/architecture-structure.md`](docs/architecture-structure.md)                   | Directory layout, file structure, Server vs Client boundaries, and state separation             |
+| **Code Style (TypeScript)**          | [`docs/code-conventions-typescript.md`](docs/code-conventions-typescript.md)         | TypeScript strictness, zero `any` policy, explicit signatures, and `useRef` typing              |
+| **Code Style (Formatting)**          | [`docs/code-conventions-formatting.md`](docs/code-conventions-formatting.md)         | ESLint 7-group import sorting and JSX prop ordering rules                                       |
+| **Code Style (Styling & a11y)**      | [`docs/code-conventions-styling.md`](docs/code-conventions-styling.md)               | Tailwind CSS v4, `cn()` merging, zero hardcoded colors policy, and accessibility                |
+| **Next.js 16 & React 19**            | [`docs/nextjs-react-conventions.md`](docs/nextjs-react-conventions.md)               | App Router pages/layouts, async params, Server vs Client components, or React 19 hooks/actions  |
+| **Editor (Core & Schema)**           | [`docs/editor-tiptap-core.md`](docs/editor-tiptap-core.md)                           | Tiptap engine setup, editor store, and block vs inline text attribute matrix                    |
+| **Editor (Inline Extensions)**       | [`docs/editor-tiptap-extensions-inline.md`](docs/editor-tiptap-extensions-inline.md) | Custom inline mark/style extensions (`extensions/font-size.ts`) and command chaining            |
+| **Editor (Block Extensions)**        | [`docs/editor-tiptap-extensions-block.md`](docs/editor-tiptap-extensions-block.md)   | Custom block-level extensions (`extensions/line-height.ts`) using `setNodeMarkup`               |
+| **Editor (Canvas & Ruler)**          | [`docs/editor-tiptap-canvas.md`](docs/editor-tiptap-canvas.md)                       | Document canvas layout (816px), ruler pointer tracking, printable margins, and list styles      |
+| **Editor (Toolbar Pattern)**         | [`docs/editor-tiptap-toolbar.md`](docs/editor-tiptap-toolbar.md)                     | Toolbar component architecture, button groups, and active state styling                         |
+| **Editor (Toolbar Controls)**        | [`docs/editor-tiptap-controls.md`](docs/editor-tiptap-controls.md)                   | Dropdown selectors, color/highlight popovers, link/image dialogs, and steppers                  |
+| **Editor (Navbar & Menubar)**        | [`docs/editor-tiptap-navbar.md`](docs/editor-tiptap-navbar.md)                       | Document title input, export operations (JSON/HTML/PDF), table grid, and menubar                |
+| **Multiplayer (Room & Presence)**    | [`docs/realtime-collaboration-room.md`](docs/realtime-collaboration-room.md)         | Liveblocks room setup, presence cursors, avatars, and comment threads                           |
+| **Multiplayer (Auth & Permissions)** | [`docs/realtime-collaboration-auth.md`](docs/realtime-collaboration-auth.md)         | `/api/liveblocks-auth` route handler, Clerk permissions, and protected boundaries               |
+| **Database & Backend**               | [`docs/database-conventions.md`](docs/database-conventions.md)                       | Convex schema, reactive queries (`useQuery`), mutations (`useMutation`), or multi-tenancy rules |
+| **Theming (Architecture)**           | [`docs/theming-architecture.md`](docs/theming-architecture.md)                       | Tri-theme model (light/dark/system), next-themes setup, and core invariant rules                |
+| **Theming (Tokens)**                 | [`docs/theming-tokens.md`](docs/theming-tokens.md)                                   | OKLCH semantic tokens, Tailwind v4 `@theme inline`, pairing matrix, and status colors           |
+| **Theming (Editor & Cursors)**       | [`docs/theming-editor.md`](docs/theming-editor.md)                                   | Dual-surface canvas theming, print media isolation, and multiplayer cursor flags                |
+| **Theming (Prose Styling)**          | [`docs/theming-prose.md`](docs/theming-prose.md)                                     | Typography and ProseMirror content element styling in dark/light mode                           |
+| **Theming (Integrations)**           | [`docs/theming-integrations.md`](docs/theming-integrations.md)                       | Liveblocks UI dual-stylesheet setup and Clerk appearance `baseTheme` binding                    |
+| **Theming (Chrome & Components)**    | [`docs/theming-components.md`](docs/theming-components.md)                           | Ruler, toolbar, popover, and color picker theming plus new component checklist                  |
+| **Theming (Controls & UX)**          | [`docs/theming-controls.md`](docs/theming-controls.md)                               | Global `d` hotkey listener, `ModeToggle` component pattern, and transition glitch prevention    |
+| **Development & Git**                | [`docs/development-workflow.md`](docs/development-workflow.md)                       | Running dev/lint scripts, verification steps, conventional commit formatting, or boundaries     |
 
 ---
 
