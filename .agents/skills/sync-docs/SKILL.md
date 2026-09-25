@@ -16,16 +16,17 @@ Use this skill when the user asks to "sync docs", perform a "Knowledge Synchroni
    - **Important:** If no new reusable conventions were established, explicitly report that no documentation updates were required and stop.
 3. **Route & Update:**
    - Check the modular files in `docs/`:
-     - `architecture.md` (System design, stack, client/server boundaries)
-     - `code-conventions.md` (Formatting, imports, JSX prop sorting, TypeScript rules)
+     - `architecture-*.md` (System design, stack, directory layout, client/server boundaries)
+     - `code-conventions-*.md` (TypeScript rules, ESLint, import sorting, JSX props, Tailwind styling, a11y)
      - `nextjs-react-conventions.md` (App router, async params, React 19 patterns)
-     - `editor-tiptap.md` (Tiptap extensions, ProseMirror schema, toolbar, ruler)
-     - `realtime-collaboration.md` (Liveblocks room, presence cursors, comments)
+     - `editor-tiptap-*.md` (Core schema, extensions, canvas/ruler, toolbar, dropdown controls, navbar)
+     - `realtime-collaboration-*.md` (Liveblocks room, presence cursors, comments, auth route)
      - `database-conventions.md` (Convex schema, queries, mutations, multi-tenancy)
+     - `theming-*.md` (Architecture, OKLCH tokens, editor, prose, integrations, components, controls)
      - `development-workflow.md` (Scripts, linting, git commit conventions)
    - Append or update the relevant file with concise, token-optimized bullet points or tables.
 4. **Create (if necessary):**
-   - If the learning belongs to a completely new domain or category, create a new `docs/[topic]-conventions.md` file adhering to the existing modular format.
+   - If the learning belongs to a completely new domain or category, create a new `docs/[topic]-[subtopic].md` file adhering to the existing modular format.
 5. **Sync the Index:**
    - If a new doc was created, update the `Documentation Router` table in [AGENTS.md](file:///Users/blagare/Desktop/Next%20JS%20Learning/nextjs16-realtime-docs-clone/AGENTS.md) with the document path and a concise 1-sentence summary of what it covers.
 6. **Verify Formatting:**
@@ -35,4 +36,5 @@ Use this skill when the user asks to "sync docs", perform a "Knowledge Synchroni
 
 - Focus strictly on high-level reusable rules, patterns, and architectural conventions—never document one-off feature requirements or ephemeral bug details.
 - Keep the language minimal, crisp, and token-efficient.
+- If any documentation file grows beyond 120 lines, automatically break it down into logically named sub-files and register the new references in `AGENTS.md`.
 - Explicitly state which documentation files were updated or created and summarize the added rules.
