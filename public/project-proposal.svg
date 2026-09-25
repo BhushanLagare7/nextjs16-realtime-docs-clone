@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 517">
+  <style>
+    :root {
+      --canvas-bg: var(--card, #ffffff);
+      --canvas-border: var(--border, #e4e4e7);
+      --text-foreground: var(--card-foreground, #18181b);
+      --text-muted: var(--muted-foreground, #71717a);
+      --primary: #1D4ED8;
+      --secondary: #3B82F6;
+      --geo-base: #DBEAFE;
+      --geo-shape-1: #93C5FD;
+      --geo-shape-2: #60A5FA;
+      --geo-shape-3: #3B82F6;
+      --geo-shape-4: #1D4ED8;
+    }
+
+    .canvas-bg { fill: var(--canvas-bg); }
+    .stroke-border { stroke: var(--canvas-border); }
+    .text-foreground { fill: var(--text-foreground); }
+    .text-muted { fill: var(--text-muted); }
+    .primary { fill: var(--primary); }
+    .secondary { fill: var(--secondary); }
+    .geo-base { fill: var(--geo-base); }
+    .geo-shape-1 { fill: var(--geo-shape-1); }
+    .geo-shape-2 { fill: var(--geo-shape-2); }
+    .geo-shape-3 { fill: var(--geo-shape-3); }
+    .geo-shape-4 { fill: var(--geo-shape-4); }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: var(--card, #202024);
+        --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+        --text-foreground: var(--card-foreground, #fafafa);
+        --text-muted: var(--muted-foreground, #a1a1aa);
+        --primary: #93C5FD;
+        --secondary: #BFDBFE;
+        --geo-base: #172554;
+        --geo-shape-1: #1E3A8A;
+        --geo-shape-2: #1D4ED8;
+        --geo-shape-3: #2563EB;
+        --geo-shape-4: #60A5FA;
+      }
+    }
+
+    :where(.dark, .dark *) {
+      --canvas-bg: var(--card, #202024);
+      --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+      --text-foreground: var(--card-foreground, #fafafa);
+      --text-muted: var(--muted-foreground, #a1a1aa);
+      --primary: #93C5FD;
+      --secondary: #BFDBFE;
+      --geo-base: #172554;
+      --geo-shape-1: #1E3A8A;
+      --geo-shape-2: #1D4ED8;
+      --geo-shape-3: #2563EB;
+      --geo-shape-4: #60A5FA;
+    }
+  </style>
+  <rect x="0.5" y="0.5" width="399" height="516" rx="2" class="canvas-bg stroke-border" stroke-width="1"/>
+  <!--Geometric Pattern-->
+  <g transform="translate(50, 30) scale(0.7)">
+    <!--Background layers-->
+    <path d="M0 0 L450 0 L450 250 L0 250 Z" class="geo-base"/>
+    <path d="M0 50 L200 50 L350 200 L0 200 Z" class="geo-shape-1" transform="rotate(-10)"/>
+    <path d="M100 100 L450 100 L450 250 L100 250 Z" class="geo-shape-2" transform="rotate(-10)"/>
+    <path d="M-50 150 L100 150 L100 200 L-50 200 Z" class="geo-shape-3" transform="rotate(-10)"/>
+    <path d="M350 180 L450 180 L450 230 L350 230 Z" class="geo-shape-4" transform="rotate(-10)"/>
+  </g>
+  <!--Project Title-->
+  <text x="50" y="300" font-family="Arial, sans-serif" font-size="24" class="primary" font-weight="bold">
+    Project Name
+  </text>
+  <!--Date-->
+  <text x="50" y="330" font-family="Arial, sans-serif" font-size="12" class="secondary">
+    09.04.20XX
+  </text>
+  <!--Contact Information-->
+  <text x="50" y="380" font-family="Arial, sans-serif" font-size="12" class="text-muted">
+    Your Name
+  </text>
+  <text x="50" y="400" font-family="Arial, sans-serif" font-size="12" class="text-muted">
+    Your Company
+  </text>
+  <text x="50" y="420" font-family="Arial, sans-serif" font-size="12" class="text-muted">
+    123 Your Street
+  </text>
+  <text x="50" y="440" font-family="Arial, sans-serif" font-size="12" class="text-muted">
+    Your City, ST 12345
+  </text>
+</svg>

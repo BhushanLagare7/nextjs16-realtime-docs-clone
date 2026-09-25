@@ -67,3 +67,51 @@ export function ClerkThemeProvider({
   )
 }
 ```
+
+---
+
+## 3. Static SVG Artwork & Illustration Theming
+
+Standalone SVG illustrations (e.g. template thumbnails in `public/*.svg`) cannot directly inherit parent HTML classes when loaded via `<img>` or CSS `background-image: url(...)`.
+
+To guarantee consistent theming across light, dark, and system modes:
+
+1. **Internal `<style>` Block with CSS Variables**:
+   Define root CSS variables with fallbacks mapping to project design tokens:
+   ```xml
+   <style>
+     :root {
+       --canvas-bg: var(--card, #ffffff);
+       --canvas-border: var(--border, #e4e4e7);
+       --text-foreground: var(--card-foreground, #18181b);
+       --text-muted: var(--muted-foreground, #71717a);
+       --primary: #1D4ED8;
+     }
+     .canvas-bg { fill: var(--canvas-bg); }
+     .stroke-border { stroke: var(--canvas-border); }
+     .text-foreground { fill: var(--text-foreground); }
+     .text-muted { fill: var(--text-muted); }
+     .primary { fill: var(--primary); }
+
+     @media (prefers-color-scheme: dark) {
+       :root {
+         --canvas-bg: var(--card, #202024);
+         --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+         --text-foreground: var(--card-foreground, #fafafa);
+         --text-muted: var(--muted-foreground, #a1a1aa);
+         --primary: #93C5FD;
+       }
+     }
+     :where(.dark, .dark *) {
+       --canvas-bg: var(--card, #202024);
+       --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+       --text-foreground: var(--card-foreground, #fafafa);
+       --text-muted: var(--muted-foreground, #a1a1aa);
+       --primary: #93C5FD;
+     }
+   </style>
+   ```
+2. **Dual-Mode Selector Coverage**:
+   Always declare both `@media (prefers-color-scheme: dark)` (for system preference) and `:where(.dark, .dark *)` (for class-based `next-themes` overrides).
+3. **Contrast Adjustments**:
+   In dark mode, soften primary brand accents (e.g., `#93C5FD` vs light mode `#1D4ED8`) to preserve legibility and prevent eye strain.

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 517">
+  <style>
+    :root {
+      --canvas-bg: var(--card, #ffffff);
+      --canvas-border: var(--border, #e4e4e7);
+      --text-foreground: var(--card-foreground, #18181b);
+      --text-muted: var(--muted-foreground, #71717a);
+      --primary: #1D4ED8;
+      --secondary: #3B82F6;
+    }
+
+    .canvas-bg { fill: var(--canvas-bg); }
+    .stroke-border { stroke: var(--canvas-border); }
+    .text-foreground { fill: var(--text-foreground); }
+    .text-muted { fill: var(--text-muted); }
+    .primary { fill: var(--primary); }
+    .secondary { fill: var(--secondary); }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --canvas-bg: var(--card, #202024);
+        --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+        --text-foreground: var(--card-foreground, #fafafa);
+        --text-muted: var(--muted-foreground, #a1a1aa);
+        --primary: #93C5FD;
+        --secondary: #BFDBFE;
+      }
+    }
+
+    :where(.dark, .dark *) {
+      --canvas-bg: var(--card, #202024);
+      --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
+      --text-foreground: var(--card-foreground, #fafafa);
+      --text-muted: var(--muted-foreground, #a1a1aa);
+      --primary: #93C5FD;
+      --secondary: #BFDBFE;
+    }
+  </style>
+  <rect x="0.5" y="0.5" width="399" height="516" rx="2" class="canvas-bg stroke-border" stroke-width="1"/>
+  <!--Logo/Quarter Circle in top left-->
+  <path d="M0 0 L80 0 A80 80 0 0 0 0 80 Z" class="primary"/>
+  <!--Main Title-->
+  <text x="40" y="150" font-family="Arial, sans-serif" font-size="24" font-weight="bold" class="primary">
+    SOFTWARE
+  </text>
+  <text x="40" y="180" font-family="Arial, sans-serif" font-size="24" font-weight="bold" class="primary">
+    DEVELOPMENT
+  </text>
+  <text x="40" y="210" font-family="Arial, sans-serif" font-size="24" font-weight="bold" class="primary">
+    PROPOSAL
+  </text>
+  <!--Bottom Section-->
+  <text x="40" y="350" font-family="Arial, sans-serif" font-size="12" font-weight="bold" class="secondary">
+    PREPARED FOR
+  </text>
+  <text x="40" y="370" font-family="Arial, sans-serif" font-size="11" class="text-foreground">
+    Client&apos;s name
+  </text>
+  <text x="40" y="390" font-family="Arial, sans-serif" font-size="11" class="text-muted">
+    Client&apos;s company name
+  </text>
+  <text x="40" y="420" font-family="Arial, sans-serif" font-size="12" font-weight="bold" class="secondary">
+    PREPARED BY
+  </text>
+  <text x="40" y="440" font-family="Arial, sans-serif" font-size="11" class="text-foreground">
+    Your name
+  </text>
+  <text x="40" y="460" font-family="Arial, sans-serif" font-size="11" class="text-muted">
+    Your company name
+  </text>
+</svg>

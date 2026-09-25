@@ -82,17 +82,9 @@ export default function DocumentPage({ params }: { params: { documentId: string 
 3. **Avoid Unnecessary Re-Renders**:
    - Keep hooks focused. Extract derived state using pure calculations or selector hooks rather than multiple chained effects.
 4. **URL Search Parameter State (`nuqs`)**:
-   - For interactive state that should sync with the URL (such as search filters, active tabs, template categories), use the `nuqs` library adapter:
-     ```tsx
-     "use client";
-
-     import { useQueryState } from "nuqs";
-
-     export function SearchInput() {
-       const [search, setSearch] = useQueryState("search", { defaultValue: "" });
-       ...
-     }
-     ```
+   - For interactive state that should sync with the URL (such as search queries, filters, pagination), use `nuqs` typed parsers and hooks (`parseAsString.withDefault("").withOptions({ clearOnDefault: true })`).
+   - Wrap client components that consume `nuqs` hooks in a React `<Suspense>` boundary to prevent Next.js static prerender CSR bailouts.
+   - Wrap children with `<NuqsAdapter>` in the root `app/layout.tsx`.
 
 5. **Global Keyboard Shortcut Listeners**:
    - Always guard listeners against editable targets (`target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))`) to prevent hotkeys (e.g. theme toggle shortcuts) from firing while a user is typing inside text inputs, textareas, or Tiptap editor nodes.
