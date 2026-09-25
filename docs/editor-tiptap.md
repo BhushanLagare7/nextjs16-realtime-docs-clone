@@ -10,7 +10,7 @@ The document editor is powered by Tiptap v3. It integrates with ProseMirror unde
 
 - **Editor Hook**: Initialized via `useEditor` from `@tiptap/react`. Always set `immediatelyRender: false` in Next.js App Router to avoid React 19 SSR hydration mismatch warnings.
 - **Canonical Component & Exports**: The core document editor component is named `DocumentEditor` located at `app/documents/[documentId]/editor.tsx` and accepts `DocumentEditorProps` (`{ documentId?: string }`). An alias export `export { DocumentEditor as Editor }` is provided for backwards compatibility.
-- **Editor Store**: When instantiated, the active editor reference is registered in the global Zustand store (`store/use-editor-store.ts`) via `useEditor` lifecycle callbacks (`onCreate`, `onDestroy`, `onUpdate`, `onSelectionUpdate`, `onTransaction`, `onFocus`, `onBlur`, `onContentError`) so toolbar controls can execute commands and react to editor state changes.
+- **Editor Store**: Centralized in the global Zustand store (`store/use-editor-store.ts`), managing both the active editor instance (registered via `useEditor` lifecycle callbacks) and document margins (`leftMargin`, `rightMargin`, `setLeftMargin`, `setRightMargin`, defaulting to 56px) so toolbar controls, ruler handles, and canvas padding remain synchronized.
 - **Core Extensions Configuration**: Standard editor extensions include `StarterKit.configure({ link: false })` (which bundles `Underline`, `Bold`, `Italic`, `Strike`, `BulletList`, `OrderedList`, etc. by default in Tiptap v3; `link` is disabled to prevent duplicate extension registration with the custom `Link` setup), `TextAlign.configure({ types: ["heading", "paragraph"] })`, `FontFamily`, `TextStyle`, `Color`, `Highlight.configure({ multicolor: true })`, `Link.configure({ openOnClick: false, autolink: true, defaultProtocol: "https" })`, `Image.configure({ resize: { enabled: true } })`, `Table.configure({ resizable: true })`, `TableCell`, `TableHeader`, `TableRow`, `TaskItem.configure({ nested: true })`, `TaskList`, and custom extensions `FontSizeExtension` and `LineHeightExtension`. Do not register standalone `Underline` alongside default `StarterKit` to avoid duplicate extension warnings.
 - **Native Image Resizing (Tiptap v3)**: Tiptap v3 incorporates resizable node views directly in `@tiptap/extension-image` via `Image.configure({ resize: { enabled: true } })`. Never register third-party extensions (e.g. `tiptap-extension-resize-image`) alongside `@tiptap/extension-image`, as duplicate node definitions cause editor warnings and inconsistent image parsing.
 - **Content Persistence**: Content state is synchronized collaboratively with Liveblocks via `@liveblocks/react-tiptap`.
@@ -177,11 +177,12 @@ export const LineHeightExtension = Extension.create<LineHeightOptions>({
    - The document canvas simulates a standard print page (816px width for standard 8.5in × 11in document at 96 DPI, `min-h-[1054px]`).
    - **Outer Scroll Wrapper**: `size-full overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0`.
    - **Centering Container**: `mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0`.
-   - **Editor Element (`editorProps.attributes`)**: `focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none`, with left and right margins dynamically mapped to padding.
+   - **Editor Element (`editorProps.attributes`)**: `focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none`, with left and right margins dynamically mapped to padding (`style: "padding-left: ${leftMargin}px; padding-right: ${rightMargin}px;"`).
 2. **Interactive Ruler (`ruler.tsx`)**:
    - The outer container is fixed to canvas width (`w-204 mx-auto` / 816px) with an inner `w-full h-full` relative container, guaranteeing that ruler tick marks, margin drag handles, and bottom borders strictly align with the centered 816px document canvas.
-   - Left and right margin markers emit drag coordinates to control document indentation.
-   - Ruler values correspond directly to padding styles on the print container (e.g., `paddingLeft: ${leftMargin}px`).
+   - Left and right margin markers emit drag coordinates to update `leftMargin` and `rightMargin` in `useEditorStore` (or via optional controlled props), synchronously adjusting the editor's editing surface padding.
+   - Markers use Pointer Events with pointer capture (`setPointerCapture(pointerId)`) on `pointerdown` and release on `pointerup`/`pointercancel`, ensuring active drags continue tracking smoothly even when the pointer moves outside ruler bounds.
+   - Double-clicking either marker resets it to `DEFAULT_MARGIN` (56px) and restores standard editor padding.
 3. **Print Support**:
    - Media queries (`@media print`) hide toolbars, rulers, and collaboration chrome, printing only the editor document body with clean pagination.
 4. **Theming & Dark Mode**:
@@ -317,7 +318,7 @@ The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above
 1. **Global Editor Instance Access**:
    - Reads `editor` from `useEditorStore` to execute top-level document mutations, serialization, and history operations.
 2. **Document Export Operations (`onDownload`)**:
-   - Employs a standardized client-side download helper creating temporary object URLs (`URL.createObjectURL(blob)`), programmatically dispatching an anchor click, and triggering browser file download:
+   - Employs a standardized client-side download helper creating temporary object URLs (`URL.createObjectURL(blob)`), programmatically dispatching an anchor click, and revoking the URL immediately via `URL.revokeObjectURL(url)` to release blob memory:
      - **JSON**: Serializes document nodes via `editor.getJSON()` into `new Blob([JSON.stringify(content)], { type: "application/json" })`.
      - **HTML**: Serializes formatted markup via `editor.getHTML()` into `new Blob([content], { type: "text/html" })`.
      - **Plain Text**: Extracts raw text via `editor.getText()` into `new Blob([content], { type: "text/plain" })`.
@@ -326,7 +327,8 @@ The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above
    - Preset table dimension actions ($1 \times 1$, $2 \times 2$, $3 \times 3$, $4 \times 4$) execute `@tiptap/extension-table` commands via `editor.chain().focus().insertTable({ rows, cols, withHeaderRow: false }).run()`.
 4. **History & Formatting Shortcuts**:
    - History commands execute `editor.chain().focus().undo().run()` and `redo().run()` with standard platform shortcut badges (`⌘Z`, `⌘Y`).
-   - Text mark toggles execute `toggleBold()`, `toggleItalic()`, `toggleUnderline()`, and `toggleStrike()`, alongside bulk mark clearance via `unsetAllMarks()`.
+   - Text mark toggles execute `toggleBold()`, `toggleItalic()`, `toggleUnderline()`, and `toggleStrike()` with shortcut badge `⌘⇧S` matching the `Mod-Shift-s` binding, alongside bulk mark clearance via `unsetAllMarks()`.
+   - Unimplemented menu items (`New Document`, `Rename`, `Remove`) are explicitly marked `disabled` until corresponding actions/mutations exist.
 5. **Menubar Styling & Token Conventions**:
    - Menubar triggers and items use semantic tokens (`hover:bg-muted`, `focus:bg-accent focus:text-accent-foreground`).
    - SVG icons inside Menubar items automatically scale to `size-4` via built-in item selector rules (`[&_svg:not([class*='size-'])]:size-4`).

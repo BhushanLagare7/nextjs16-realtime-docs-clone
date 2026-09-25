@@ -165,9 +165,9 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        style: "padding-left: 56px; padding-right: 56px;",
+        style: `padding-left: ${leftMargin}px; padding-right: ${rightMargin}px;`,
         class: cn(
-          "flex min-h-[1054px] w-[816px] cursor-text flex-col pt-10 pr-14 pb-10 focus:outline-none",
+          "flex min-h-[1054px] w-[816px] cursor-text flex-col pt-10 pb-10 focus:outline-none",
           // Theming: Uses semantic card surface on screen, strictly white on print
           "border border-border bg-card text-card-foreground shadow-xs",
           "print:border-none print:bg-white print:p-0 print:text-black print:shadow-none"

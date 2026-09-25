@@ -39,7 +39,8 @@ interface DocumentEditorProps {
 export function DocumentEditor({ documentId }: DocumentEditorProps) {
   void documentId // reserved for future use (e.g. loading/saving document content)
 
-  const { setEditor } = useEditorStore()
+  const { leftMargin, rightMargin, setEditor, setLeftMargin, setRightMargin } =
+    useEditorStore()
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -71,9 +72,9 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     editorProps: {
       attributes: {
         // Emulates a page-like editing surface (fixed width/height, print-friendly styles)
-        style: "padding-left: 56px; padding-right: 56px;",
+        style: `padding-left: ${leftMargin ?? 56}px; padding-right: ${rightMargin ?? 56}px;`,
         class:
-          "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none",
+          "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 cursor-text print:bg-white print:text-black print:border-none print:shadow-none",
       },
     },
     extensions: [
@@ -120,7 +121,12 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
   return (
     // Scrollable container that centers the "page" and adapts for print
     <div className="size-full flex-1 overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
-      <Ruler />
+      <Ruler
+        leftMargin={leftMargin}
+        rightMargin={rightMargin}
+        setLeftMargin={setLeftMargin}
+        setRightMargin={setRightMargin}
+      />
       <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
       </div>

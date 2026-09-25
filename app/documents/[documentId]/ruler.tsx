@@ -4,24 +4,25 @@ import { useRef, useState } from "react"
 import { FaCaretDown } from "react-icons/fa"
 
 import { cn } from "@/lib/utils"
+import { useEditorStore } from "@/store/use-editor-store"
 
 /**
  * Total width of the page/document in pixels.
  * This represents the standard width used for margin calculations (e.g., 8.5" at 96 DPI).
  */
-const PAGE_WIDTH = 816
+export const PAGE_WIDTH = 816
 
 /**
  * Minimum space (in pixels) that must remain between the left and right margins.
  * Prevents the margins from overlapping or crossing each other.
  */
-const MINIMUM_SPACE = 100
+export const MINIMUM_SPACE = 100
 
 /**
  * Default margin size (in pixels) applied to both left and right sides
  * on initial render and when a margin marker is double-clicked (reset).
  */
-const DEFAULT_MARGIN = 56
+export const DEFAULT_MARGIN = 56
 
 /**
  * Array of marker indices used to render ruler tick marks.
@@ -31,19 +32,39 @@ const DEFAULT_MARGIN = 56
 const markers = Array.from({ length: 83 }, (_, i) => i)
 
 /**
+ * Props for the `Ruler` component.
+ */
+interface RulerProps {
+  /** Current left margin offset in pixels. Defaults to value from useEditorStore. */
+  leftMargin?: number
+  /** Current right margin offset in pixels. Defaults to value from useEditorStore. */
+  rightMargin?: number
+  /** Sets/updates the left margin offset. */
+  setLeftMargin?: (value: number) => void
+  /** Sets/updates the right margin offset. */
+  setRightMargin?: (value: number) => void
+}
+
+/**
  * Props for the `Marker` component, representing a draggable margin indicator.
  */
 interface MarkerProps {
-  /** Current pixel offset of the marker from the edge of the ruler. */
-  position: number
-  /** Whether this marker represents the left margin (true) or right margin (false). */
-  isLeft: boolean
   /** Whether the marker is currently being dragged by the user. */
   isDragging: boolean
-  /** Callback fired when the user presses the mouse down on the marker (starts drag). */
-  onMouseDown: () => void
+  /** Whether this marker represents the left margin (true) or right margin (false). */
+  isLeft: boolean
+  /** Current pixel offset of the marker from the edge of the ruler. */
+  position: number
   /** Callback fired when the user double-clicks the marker (resets to default position). */
   onDoubleClick: () => void
+  /** Callback fired when pointer is canceled (ends drag and releases capture). */
+  onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void
+  /** Callback fired when pointer goes down on marker (starts drag and captures pointer). */
+  onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
+  /** Callback fired when pointer moves while dragging. */
+  onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void
+  /** Callback fired when pointer is released (ends drag and releases capture). */
+  onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void
 }
 
 /**
@@ -55,12 +76,34 @@ interface MarkerProps {
  * @param props - See {@link MarkerProps}.
  */
 function Marker({
-  position,
-  isLeft,
   isDragging,
-  onMouseDown,
+  isLeft,
+  position,
   onDoubleClick,
+  onPointerCancel,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
 }: MarkerProps) {
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    onPointerDown(e)
+  }
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    onPointerUp(e)
+  }
+
+  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId)
+    }
+    onPointerCancel(e)
+  }
+
   return (
     <div
       className={cn(
@@ -69,7 +112,10 @@ function Marker({
       )}
       style={{ [isLeft ? "left" : "right"]: `${position}px` }}
       onDoubleClick={onDoubleClick}
-      onMouseDown={onMouseDown}
+      onPointerCancel={handlePointerCancel}
+      onPointerDown={handlePointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={handlePointerUp}
     >
       {/* Caret icon indicating the draggable margin handle */}
       <FaCaretDown className="absolute top-0 left-1/2 h-full -translate-x-1/2 fill-primary hover:fill-primary/80" />
@@ -94,21 +140,24 @@ function Marker({
  * Features:
  * - Drag left/right margin markers to adjust document margins.
  * - Double-click a marker to reset it to the default margin.
+ * - Pointer events are captured on the marker to allow dragging outside ruler bounds.
+ * - Synchronizes margins with the active editor surface padding.
  * - Displays major tick marks (every 10 units, with numeric labels) and
  *   minor tick marks (every 5 units and every unit) for fine measurement.
  * - Hidden when printing (`print:hidden`).
- *
- * @remarks
- * Margin state is currently local to this component. The `TODO` comment
- * in `handleMouseMove` indicates that left margin updates should eventually
- * be synced for collaborative editing.
  */
-export function Ruler() {
-  /** Current left margin offset, in pixels, from the left edge of the page. */
-  const [leftMargin, setLeftMargin] = useState(DEFAULT_MARGIN)
+export function Ruler({
+  leftMargin: controlledLeftMargin,
+  rightMargin: controlledRightMargin,
+  setLeftMargin: controlledSetLeftMargin,
+  setRightMargin: controlledSetRightMargin,
+}: RulerProps = {}) {
+  const store = useEditorStore()
 
-  /** Current right margin offset, in pixels, from the right edge of the page. */
-  const [rightMargin, setRightMargin] = useState(DEFAULT_MARGIN)
+  const leftMargin = controlledLeftMargin ?? store.leftMargin
+  const setLeftMargin = controlledSetLeftMargin ?? store.setLeftMargin
+  const rightMargin = controlledRightMargin ?? store.rightMargin
+  const setRightMargin = controlledSetRightMargin ?? store.setRightMargin
 
   /** Whether the left margin marker is currently being dragged. */
   const [isDraggingLeft, setIsDraggingLeft] = useState(false)
@@ -122,64 +171,72 @@ export function Ruler() {
   /**
    * Begins a drag operation for the left margin marker.
    */
-  const handleLeftMouseDown = () => {
+  const handleLeftPointerDown = () => {
     setIsDraggingLeft(true)
   }
 
   /**
    * Begins a drag operation for the right margin marker.
    */
-  const handleRightMouseDown = () => {
+  const handleRightPointerDown = () => {
     setIsDraggingRight(true)
   }
 
   /**
-   * Handles mouse movement over the ruler while a margin marker is being dragged.
+   * Handles pointer movement over the left marker while dragging.
    *
-   * Calculates the mouse position relative to the ruler container, clamps it
+   * Calculates pointer position relative to the ruler container, clamps it
    * within valid bounds (respecting `MINIMUM_SPACE` between margins), and
-   * updates the corresponding margin state (`leftMargin` or `rightMargin`).
+   * updates the left margin state.
    *
-   * @param e - The React mouse event triggered by moving the pointer over the ruler.
+   * @param e - The React pointer event triggered by moving the captured pointer.
    */
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if ((isDraggingLeft || isDraggingRight) && rulerRef.current) {
-      const container = rulerRef.current.querySelector("#ruler-container")
-      if (container) {
-        const containerRect = container.getBoundingClientRect()
+  const handleLeftPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingLeft || !rulerRef.current) return
 
-        // Mouse X position relative to the left edge of the ruler container.
-        const relativeX = e.clientX - containerRect.left
+    const container = rulerRef.current.querySelector("#ruler-container")
+    if (!container) return
 
-        // Clamp the raw position within the page bounds [0, PAGE_WIDTH].
-        const rawPosition = Math.max(0, Math.min(PAGE_WIDTH, relativeX))
+    const containerRect = container.getBoundingClientRect()
+    const relativeX = e.clientX - containerRect.left
+    const rawPosition = Math.max(0, Math.min(PAGE_WIDTH, relativeX))
+    const maxLeftPosition = PAGE_WIDTH - rightMargin - MINIMUM_SPACE
+    const newLeftPosition = Math.min(rawPosition, maxLeftPosition)
+    setLeftMargin(newLeftPosition)
+  }
 
-        if (isDraggingLeft) {
-          // Ensure the left margin doesn't cross into the right margin's minimum space.
-          const maxLeftPosition = PAGE_WIDTH - rightMargin - MINIMUM_SPACE
-          const newLeftPosition = Math.min(rawPosition, maxLeftPosition)
-          setLeftMargin(newLeftPosition) // TODO: Make collaborative
-        } else if (isDraggingRight) {
-          // Ensure the right margin doesn't cross into the left margin's minimum space.
-          const maxRightPosition = PAGE_WIDTH - (leftMargin + MINIMUM_SPACE)
+  /**
+   * Handles pointer movement over the right marker while dragging.
+   *
+   * Calculates pointer position relative to the ruler container, clamps it
+   * within valid bounds (respecting `MINIMUM_SPACE` between margins), and
+   * updates the right margin state.
+   *
+   * @param e - The React pointer event triggered by moving the captured pointer.
+   */
+  const handleRightPointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRight || !rulerRef.current) return
 
-          // Convert the raw (left-relative) position into a right-margin offset.
-          const newRightPosition = Math.max(PAGE_WIDTH - rawPosition, 0)
-          const constrainedRightPosition = Math.min(
-            newRightPosition,
-            maxRightPosition
-          )
-          setRightMargin(constrainedRightPosition)
-        }
-      }
-    }
+    const container = rulerRef.current.querySelector("#ruler-container")
+    if (!container) return
+
+    const containerRect = container.getBoundingClientRect()
+    const relativeX = e.clientX - containerRect.left
+    const rawPosition = Math.max(0, Math.min(PAGE_WIDTH, relativeX))
+    const maxRightPosition = PAGE_WIDTH - (leftMargin + MINIMUM_SPACE)
+    const newRightPosition = Math.max(PAGE_WIDTH - rawPosition, 0)
+    const constrainedRightPosition = Math.min(
+      newRightPosition,
+      maxRightPosition
+    )
+    setRightMargin(constrainedRightPosition)
   }
 
   /**
    * Ends any active drag operation, whether for the left or right margin marker.
-   * Triggered on mouse up or when the pointer leaves the ruler area.
+   * Triggered on pointer up or cancellation.
    */
-  const handleMouseUp = () => {
+  const handlePointerUp = () => {
     setIsDraggingLeft(false)
     setIsDraggingRight(false)
   }
@@ -204,9 +261,6 @@ export function Ruler() {
     <div
       ref={rulerRef}
       className="relative mx-auto flex h-6 w-204 items-end border-b border-border bg-background select-none print:hidden"
-      onMouseLeave={handleMouseUp}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
     >
       <div className="relative h-full w-full" id="ruler-container">
         {/* Left margin draggable marker */}
@@ -215,7 +269,10 @@ export function Ruler() {
           isLeft={true}
           position={leftMargin}
           onDoubleClick={handleLeftDoubleClick}
-          onMouseDown={handleLeftMouseDown}
+          onPointerCancel={handlePointerUp}
+          onPointerDown={handleLeftPointerDown}
+          onPointerMove={handleLeftPointerMove}
+          onPointerUp={handlePointerUp}
         />
 
         {/* Right margin draggable marker */}
@@ -224,7 +281,10 @@ export function Ruler() {
           isLeft={false}
           position={rightMargin}
           onDoubleClick={handleRightDoubleClick}
-          onMouseDown={handleRightMouseDown}
+          onPointerCancel={handlePointerUp}
+          onPointerDown={handleRightPointerDown}
+          onPointerMove={handleRightPointerMove}
+          onPointerUp={handlePointerUp}
         />
 
         {/* Tick mark scale rendered along the bottom of the ruler */}

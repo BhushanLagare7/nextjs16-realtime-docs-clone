@@ -125,5 +125,5 @@ nextjs16-realtime-docs-clone/
 
 - **Document Content**: Managed by Tiptap and synced via Liveblocks CRDT data channels.
 - **Document Metadata**: (Title, owner, orgId, updated timestamp) Managed by Convex.
-- **Editor UI State**: (Active editor reference, selection marks, font sizes) Managed by Zustand (`use-editor-store`).
+- **Editor UI State**: (Active editor reference, page margins, selection marks, font sizes) Managed by Zustand (`use-editor-store`).
 - **URL / Navigation State**: Managed via `nuqs` or Next.js navigation hooks.

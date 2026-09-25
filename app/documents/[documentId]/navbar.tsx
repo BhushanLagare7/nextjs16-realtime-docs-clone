@@ -59,6 +59,7 @@ export function Navbar() {
     a.href = url
     a.download = filename
     a.click()
+    URL.revokeObjectURL(url)
   }
 
   const onSaveJSON = () => {
@@ -130,16 +131,16 @@ export function Navbar() {
                       </MenubarItem>
                     </MenubarSubContent>
                   </MenubarSub>
-                  <MenubarItem>
+                  <MenubarItem disabled>
                     <FilePlusIcon />
                     New Document
                   </MenubarItem>
                   <MenubarSeparator />
-                  <MenubarItem>
+                  <MenubarItem disabled>
                     <FilePenIcon />
                     Rename
                   </MenubarItem>
-                  <MenubarItem>
+                  <MenubarItem disabled>
                     <TrashIcon />
                     Remove
                   </MenubarItem>
@@ -243,7 +244,7 @@ export function Navbar() {
                       >
                         <StrikethroughIcon />
                         <span>Strikethrough&nbsp;&nbsp;</span>{" "}
-                        <MenubarShortcut>⌘S</MenubarShortcut>
+                        <MenubarShortcut>⌘⇧S</MenubarShortcut>
                       </MenubarItem>
                     </MenubarSubContent>
                   </MenubarSub>
