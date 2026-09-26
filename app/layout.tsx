@@ -7,6 +7,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app"
 
 import { ConvexClientProvider } from "@/components/convex-client-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import { cn } from "@/lib/utils"
 
 // SEO and social sharing metadata for the app
@@ -82,7 +83,10 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <NuqsAdapter>
-            <ConvexClientProvider>{children}</ConvexClientProvider>
+            <ConvexClientProvider>
+              <Toaster />
+              {children}
+            </ConvexClientProvider>
           </NuqsAdapter>
         </ThemeProvider>
       </body>

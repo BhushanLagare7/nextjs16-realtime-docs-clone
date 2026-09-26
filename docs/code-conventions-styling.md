@@ -40,6 +40,9 @@ This document establishes the styling standards, Tailwind CSS v4 class merging r
      - Document canvas print styles may use `print:bg-white` and `print:text-black` to guarantee standard physical paper output regardless of the active screen theme.
      - User-authored document text/highlight marks and color picker palette matrices (`GOOGLE_DOCS_PALETTE`) representing arbitrary user content or input values (not UI component chrome or layout surfaces).
    - Full theming architecture and token pairing rules are documented in [`docs/theming-tokens.md`](theming-tokens.md).
+5. **Tailwind v4 Sizing Utilities & Pseudo-Class Variants**:
+   - Prefer Tailwind v4 fractional sizing utilities (`w-12.5` for 50px) over arbitrary bracket notations (`w-[50px]`).
+   - Prefer standard Tailwind v4 pseudo-class variants (e.g. `has-[[role=checkbox]]:pr-0`) over legacy arbitrary selector nesting (`[&:has([role=checkbox])]:pr-0`).
 
 ---
 

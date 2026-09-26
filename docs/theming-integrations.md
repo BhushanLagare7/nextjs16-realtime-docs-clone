@@ -1,6 +1,6 @@
-# Liveblocks & Clerk Authentication Theming
+# Third-Party UI Theming Integrations
 
-This document details third-party UI theming integration standards for **Liveblocks** and **Clerk**.
+This document details third-party UI theming integration standards for **Liveblocks**, **Clerk**, and **Sonner**.
 
 ---
 
@@ -84,27 +84,30 @@ Standalone SVG illustrations (e.g. template thumbnails in `public/*.svg`) loaded
       --primary: #1D4ED8;
     }
     .canvas-bg { fill: var(--canvas-bg); }
-    .stroke-border { stroke: var(--canvas-border); }
-    .text-foreground { fill: var(--text-foreground); }
-    .text-muted { fill: var(--text-muted); }
-    .primary { fill: var(--primary); }
+    /* Utility classes: .stroke-border, .text-foreground, .text-muted, .primary */
 
     @media (prefers-color-scheme: dark) {
-      :root {
-        --canvas-bg: var(--card, #202024);
-        --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
-        --text-foreground: var(--card-foreground, #fafafa);
-        --text-muted: var(--muted-foreground, #a1a1aa);
-        --primary: #93C5FD;
-      }
+      :root { --canvas-bg: var(--card, #202024); --primary: #93C5FD; /* … */ }
     }
-    :where(.dark, .dark *) {
-      --canvas-bg: var(--card, #202024);
-      --canvas-border: var(--border, rgba(255, 255, 255, 0.1));
-      --text-foreground: var(--card-foreground, #fafafa);
-      --text-muted: var(--muted-foreground, #a1a1aa);
-      --primary: #93C5FD;
-    }
+    /* Duplicate overrides in :where(.dark, .dark *) for class-based toggle */
   </style>
   ```
 - **Contrast Adjustments**: In dark mode, soften primary brand accents (e.g., `#93C5FD` vs light mode `#1D4ED8`) to preserve legibility and prevent eye strain.
+
+---
+
+## 4. Toast Notification Theming (`sonner`)
+
+The `Toaster` component (`components/ui/sonner.tsx`) bridges semantic theme tokens into sonner's internal CSS custom property API:
+
+1. **CSS Custom Property Bridge**: Map design tokens via inline `style` on the `<Toaster>`:
+   ```tsx
+   style={{
+     "--normal-bg": "var(--popover)",
+     "--normal-text": "var(--popover-foreground)",
+     "--normal-border": "var(--border)",
+     "--border-radius": "var(--radius)",
+   } as React.CSSProperties}
+   ```
+2. **Theme Binding**: Pass `theme={resolvedTheme}` from `next-themes` `useTheme()` so sonner auto-switches its dark/light mode palette alongside the app.
+3. **Placement**: The `<Toaster />` renders inside `ConvexClientProvider` in `app/layout.tsx` since toast dispatches (`toast.success()`, `toast.error()`) originate from Convex `useMutation` callbacks.

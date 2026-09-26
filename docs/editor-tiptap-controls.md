@@ -12,8 +12,7 @@ Dropdown selectors in the toolbar (e.g. `FontFamilyButton`, `HeadingLevelButton`
    - Always define explicit fixed widths (e.g., `w-30`) with `justify-between` and `overflow-hidden` for text dropdown triggers (`FontFamilyButton`, `HeadingLevelButton`).
    - Never use dynamic widths (`min-w-7 justify-center`), as changing active options (e.g., `"Normal text"` vs `"Heading 1"`) causes layout shifts (jitter) across subsequent toolbar controls.
 2. **Popover Content Width & Single-Line Text**:
-   - `components/ui/dropdown-menu.tsx` defaults to `w-(--radix-dropdown-menu-trigger-width) min-w-32`. On triggers narrower than option labels, this forces multi-word options (e.g., `"Times New Roman"`, `"Paste image URL"`) to wrap across lines.
-   - Always override on `<DropdownMenuContent>` with `w-auto min-w-48 flex-col gap-y-1 p-1` and add `whitespace-nowrap` to option labels to guarantee single-line rendering across all dropdown selectors (`FontFamilyButton`, `HeadingLevelButton`, `ImageButton`).
+   - `components/ui/dropdown-menu.tsx` defaults to `min-w-32`. To ensure comfortable menu width and prevent multi-word options (e.g., `"Times New Roman"`, `"Paste image URL"`) from wrapping, always set `w-auto min-w-48 flex-col gap-y-1 p-1` on `<DropdownMenuContent>` and add `whitespace-nowrap` to option labels across all dropdown selectors (`FontFamilyButton`, `HeadingLevelButton`, `ImageButton`).
 3. **Tiptap v3 Named Imports**:
    - Tiptap v3 packages `@tiptap/extension-text-style`, `@tiptap/extension-font-family`, `@tiptap/extension-color`, `@tiptap/extension-highlight`, and `@tiptap/extension-text-align` expose named exports (`import { TextStyle }`, `import { FontFamily }`, `import { Color }`, `import { Highlight }`, `import { TextAlign }`). Never use default imports.
 4. **Color & Highlight Picker Popovers**:

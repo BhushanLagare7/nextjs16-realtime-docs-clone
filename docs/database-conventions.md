@@ -47,51 +47,6 @@ export default defineSchema({
 
 ---
 
-## 3. Query & Mutation Guidelines
+## 3. Mutations, Pagination & Authorization
 
-### Authentication & Authorization Check
-
-Every mutation and query accessing private documents must verify the user identity:
-
-```typescript
-// convex/documents.ts
-import { mutation, query } from "./_generated/server"
-
-export const get = query({
-  args: {},
-  handler: async (ctx) => {
-    const user = await ctx.auth.getUserIdentity()
-    if (!user) {
-      throw new Error("Unauthorized")
-    }
-
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined
-
-    if (organizationId) {
-      return await ctx.db
-        .query("documents")
-        .withIndex("by_organization_id", (q) =>
-          q.eq("organizationId", organizationId)
-        )
-        .collect()
-    }
-
-    return await ctx.db
-      .query("documents")
-      .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
-      .collect()
-  },
-})
-```
-
----
-
-## 4. Multi-Tenancy Invariant
-
-Documents belong to either:
-
-1. **An Organization**: If created while active in a Clerk organization (`organizationId` set).
-2. **An Individual User**: If created in a personal workspace (`ownerId` set, `organizationId` undefined).
-
-Queries and search operations must filter strictly by active context to prevent data leaks across workspaces.
+Detailed mutation patterns, pagination queries, multi-tenancy invariants, and the authorization guard convention are documented in [`docs/database-mutations.md`](database-mutations.md).
