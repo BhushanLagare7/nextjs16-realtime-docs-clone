@@ -41,7 +41,7 @@ export function DocumentMenu({
           <MoreVertical className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end" className="w-auto min-w-48">
         <RenameDialog documentId={documentId} initialTitle={title}>
           <DropdownMenuItem
             onClick={(e) => e.stopPropagation()}

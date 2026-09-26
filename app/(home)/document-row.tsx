@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { SiGoogledocs } from "react-icons/si"
 import { useRouter } from "next/navigation"
 
@@ -15,13 +16,16 @@ interface DocumentRowProps {
 /** Clickable table row representing a single document. */
 export function DocumentRow({ document }: DocumentRowProps) {
   const router = useRouter()
+  const rowRef = useRef<HTMLTableRowElement>(null)
 
-  const onRowClick = () => {
+  const onRowClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
+    const target = e.target as Node
+    if (!rowRef.current?.contains(target)) return
     router.push(`/documents/${document._id}`)
   }
 
   return (
-    <TableRow className="cursor-pointer" onClick={onRowClick}>
+    <TableRow ref={rowRef} className="cursor-pointer" onClick={onRowClick}>
       <TableCell className="w-12.5">
         <SiGoogledocs className="size-6 text-primary" />
       </TableCell>

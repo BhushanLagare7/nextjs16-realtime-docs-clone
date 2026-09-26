@@ -92,7 +92,7 @@ The dashboard page uses Next.js Route Groups `(home)` to isolate home page layou
 3. **Date Formatting**: Formats `_creationTime` using standard `Intl.DateTimeFormat("en-US", { month: "short", day: "2-digit", year: "numeric" })`.
 4. **Navigation & Event Isolation**: Clicking the row navigates to `/documents/${document._id}`.
 5. **Document Actions Menu (`app/(home)/document-menu.tsx`)**:
-   - Encapsulates actions in a `DropdownMenu` with trigger button (`MoreVertical`, `aria-label="More options"`).
+   - Encapsulates actions in a `DropdownMenu` with trigger button (`MoreVertical`, `aria-label="More options"`) and `<DropdownMenuContent className="w-auto min-w-48">` to ensure generous width and single-line rendering of action items.
    - **Rename**: Opens modal `<RenameDialog>` to edit the document's title via `api.documents.updateById`.
    - **Remove**: Opens confirmation `<RemoveDialog>` (using `<AlertDialog>`) to permanently delete via `api.documents.removeById`.
    - **Open in a new tab**: Opens the document route (`/documents/${documentId}`) in a separate browser tab.
