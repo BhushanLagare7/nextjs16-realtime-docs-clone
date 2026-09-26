@@ -1,5 +1,6 @@
 import { DocumentEditor } from "./editor"
 import { Navbar } from "./navbar"
+import { Room } from "./room"
 import { Toolbar } from "./toolbar"
 
 interface DocumentIdPageProps {
@@ -20,8 +21,10 @@ export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
         <Navbar />
         <Toolbar />
       </div>
-      <div className="pt-[114px] print:pt-0">
-        <DocumentEditor documentId={documentId} />
+      <div className="pt-28.5 print:pt-0">
+        <Room roomId={documentId}>
+          <DocumentEditor documentId={documentId} />
+        </Room>
       </div>
     </div>
   )

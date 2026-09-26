@@ -65,6 +65,52 @@ export function Room({
 
 ## 3. Collaborative Comments & Threads
 
-- Integrated using `@liveblocks/react-ui` and `@liveblocks/react-tiptap`.
-- Threads are bound to document selections.
-- Do not modify thread container styles directly; use Liveblocks UI theme CSS variables in `app/globals.css`.
+- **Tiptap Integration**: Integrated using `@liveblocks/react-ui` and `@liveblocks/react-tiptap` (`useLiveblocksExtension`).
+- **Connection-State Guard (`useStatus`)**: Invoking `useThreads()` before the room WebSocket connection is active (`status === "connected"`) triggers a REST call to an uninitialized room, resulting in an `HttpError: 403 UNAUTHORIZED_ROOM_ACCESS` when using public API keys. Always gate thread fetching behind `status === "connected"`.
+- **Localized Suspense Boundary**: Wrap thread rendering in `<ClientSideSuspense fallback={null}>` to prevent thread loading states from bubbling up to the document-level fallback loader.
+- **Responsive Threads Layout**: Style desktop threads with `.anchored-threads` (`@apply absolute right-3 block w-full max-w-75 max-sm:hidden`) and mobile threads with `.floating-threads` (`@apply hidden max-sm:block`).
+
+```tsx
+// app/documents/[documentId]/threads.tsx
+"use client"
+
+import {
+  ClientSideSuspense,
+  useStatus,
+  useThreads,
+} from "@liveblocks/react/suspense"
+import {
+  AnchoredThreads,
+  FloatingComposer,
+  FloatingThreads,
+} from "@liveblocks/react-tiptap"
+import type { Editor } from "@tiptap/react"
+
+function ThreadsList({ editor }: { editor: Editor | null }) {
+  const { threads } = useThreads({ query: { resolved: false } })
+
+  return (
+    <>
+      <div className="anchored-threads">
+        <AnchoredThreads editor={editor} threads={threads} />
+      </div>
+      <FloatingThreads
+        className="floating-threads"
+        editor={editor}
+        threads={threads}
+      />
+      <FloatingComposer className="floating-composer" editor={editor} />
+    </>
+  )
+}
+
+export function Threads({ editor }: { editor: Editor | null }) {
+  const status = useStatus()
+
+  return (
+    <ClientSideSuspense fallback={null}>
+      {status === "connected" ? <ThreadsList editor={editor} /> : null}
+    </ClientSideSuspense>
+  )
+}
+```

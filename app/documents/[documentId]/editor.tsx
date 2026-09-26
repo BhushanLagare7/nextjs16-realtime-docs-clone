@@ -1,5 +1,6 @@
 "use client"
 
+import { useLiveblocksExtension } from "@liveblocks/react-tiptap"
 import { Color } from "@tiptap/extension-color"
 import { FontFamily } from "@tiptap/extension-font-family"
 import { Highlight } from "@tiptap/extension-highlight"
@@ -23,6 +24,7 @@ import { LineHeightExtension } from "@/extensions/line-height"
 import { useEditorStore } from "@/store/use-editor-store"
 
 import { Ruler } from "./ruler"
+import { Threads } from "./threads"
 
 interface DocumentEditorProps {
   /** ID of the document being edited (currently unused, reserved for future persistence logic) */
@@ -39,11 +41,13 @@ interface DocumentEditorProps {
 export function DocumentEditor({ documentId }: DocumentEditorProps) {
   void documentId // reserved for future use (e.g. loading/saving document content)
 
+  const liveblocks = useLiveblocksExtension()
   const { leftMargin, rightMargin, setEditor, setLeftMargin, setRightMargin } =
     useEditorStore()
 
   const editor = useEditor({
     immediatelyRender: false,
+    enableContentCheck: true,
     // Keep the global store in sync with the editor instance across its lifecycle
     onCreate({ editor }) {
       setEditor(editor)
@@ -66,7 +70,10 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     onBlur({ editor }) {
       setEditor(editor)
     },
-    onContentError({ editor }) {
+    onContentError({ editor, error, disableCollaboration }) {
+      disableCollaboration?.()
+      editor.setEditable(false, false)
+      console.error("Content validation error:", error)
       setEditor(editor)
     },
     editorProps: {
@@ -78,8 +85,10 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
       },
     },
     extensions: [
+      liveblocks,
       StarterKit.configure({
         link: false,
+        undoRedo: false,
       }),
       LineHeightExtension,
       FontSizeExtension,
@@ -129,6 +138,7 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
       />
       <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
+        <Threads editor={editor} />
       </div>
     </div>
   )

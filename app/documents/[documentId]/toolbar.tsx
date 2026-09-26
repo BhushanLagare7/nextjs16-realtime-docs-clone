@@ -19,6 +19,7 @@ import {
   ListOrderedIcon,
   ListTodoIcon,
   type LucideIcon,
+  MessageSquarePlusIcon,
   MinusIcon,
   PlusIcon,
   PrinterIcon,
@@ -852,6 +853,12 @@ export function Toolbar() {
       },
     ],
     [
+      {
+        label: "Comment",
+        icon: MessageSquarePlusIcon,
+        onClick: () => editor?.chain().focus().addPendingComment().run(),
+        isActive: editor?.isActive("liveblocksCommentMark"),
+      },
       {
         label: "List Todo",
         icon: ListTodoIcon,
