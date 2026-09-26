@@ -12,7 +12,7 @@ Tiptap is inherently **headless** — it ships without default styles or color o
 
 A document editor UI contains two distinct physical surfaces:
 
-1. **The Workspace Viewport**: The scrollable area surrounding the document page.
+1. **The Workspace Viewport**: The full-height scrollable area surrounding the document page (`min-h-screen bg-muted/40` on the page root and `flex-1 bg-muted/40` on the container, preventing bottom background color seams on tall viewports).
 2. **The Document Canvas ("Paper")**: The printable page sheet representing the 8.5in × 11in page (`816px` width at 96 DPI).
 
 ```tsx
@@ -39,9 +39,10 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
 
   return (
     // Workspace Viewport: bg-muted/40 adapts cleanly between light & dark
-    <div className="size-full overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
-      <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
+    <div className="size-full flex-1 overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
+      <div className="relative mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
+        <Threads editor={editor} />
       </div>
     </div>
   )
@@ -56,7 +57,7 @@ In real-time multiplayer sessions (via Liveblocks / Y.js):
 
 - **Collaborator Caret Flags**: Each collaborator is assigned a unique hue from a palette constrained to dark/saturated tones (ensuring ≥ 4.5:1 contrast against white text). Caret flags MUST display the collaborator's name pill with high-contrast text:
   ```css
-  .collaboration-cursor__caret {
+  .collaboration-carets__caret {
     border-left: 2px solid var(--cursor-color);
     margin-left: -1px;
     margin-right: -1px;
@@ -65,7 +66,7 @@ In real-time multiplayer sessions (via Liveblocks / Y.js):
     word-break: normal;
   }
 
-  .collaboration-cursor__label {
+  .collaboration-carets__label {
     background-color: var(--cursor-color);
     border-radius: 3px;
     color: #ffffff; /* Contrast safeguard: --cursor-color must be constrained to a palette with >= 4.5:1 contrast against white text */

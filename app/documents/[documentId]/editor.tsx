@@ -136,7 +136,7 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
         setLeftMargin={setLeftMargin}
         setRightMargin={setRightMargin}
       />
-      <div className="mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
+      <div className="relative mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
         <Threads editor={editor} />
       </div>

@@ -1,5 +1,7 @@
 "use client"
 
+import { useState } from "react"
+
 import {
   ClientSideSuspense,
   useStatus,
@@ -29,17 +31,24 @@ function ThreadsList({ editor }: ThreadsProps) {
         editor={editor}
         threads={threads}
       />
-      <FloatingComposer className="floating-composer" editor={editor} />
     </>
   )
 }
 
 export function Threads({ editor }: ThreadsProps) {
   const status = useStatus()
+  const [hasConnected, setHasConnected] = useState(false)
+
+  if (status === "connected" && !hasConnected) {
+    setHasConnected(true)
+  }
 
   return (
     <ClientSideSuspense fallback={null}>
       {status === "connected" ? <ThreadsList editor={editor} /> : null}
+      {hasConnected ? (
+        <FloatingComposer className="floating-composer" editor={editor} />
+      ) : null}
     </ClientSideSuspense>
   )
 }
