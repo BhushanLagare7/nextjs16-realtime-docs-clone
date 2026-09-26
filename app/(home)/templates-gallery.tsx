@@ -1,5 +1,11 @@
 "use client"
 
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+
+import { useMutation } from "convex/react"
+import { toast } from "sonner"
+
 import {
   Carousel,
   CarouselContent,
@@ -8,10 +14,34 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { templates } from "@/constants/templates"
+import { api } from "@/convex/_generated/api"
 import { cn } from "@/lib/utils"
 
+/**
+ * Renders a horizontally scrollable gallery of document templates.
+ * Clicking a template creates a new document and navigates to it.
+ */
 export function TemplatesGallery() {
-  const isCreating = false
+  const router = useRouter()
+  const create = useMutation(api.documents.create)
+  // Tracks whether a document is currently being created (disables interactions)
+  const [isCreating, setIsCreating] = useState(false)
+
+  // Creates a new document from the selected template and navigates to it
+  const onTemplateClick = (title: string, initialContent: string) => {
+    setIsCreating(true)
+    create({ title, initialContent })
+      .then((documentId) => {
+        toast.success("Document created")
+        router.push(`/documents/${documentId}`)
+      })
+      .catch(() => {
+        toast.error("Something went wrong")
+      })
+      .finally(() => {
+        setIsCreating(false)
+      })
+  }
 
   return (
     <div className="bg-muted">
@@ -19,6 +49,7 @@ export function TemplatesGallery() {
         <h3 className="font-medium text-foreground">Start a new document</h3>
         <Carousel>
           <CarouselContent className="-ml-4">
+            {/* Render one card per available template */}
             {templates.map((template) => (
               <CarouselItem
                 key={template.id}
@@ -33,11 +64,12 @@ export function TemplatesGallery() {
                   <button
                     aria-label={template.label}
                     className="flex size-full flex-col items-center justify-center gap-y-4 rounded-sm border border-border bg-card bg-cover bg-center bg-no-repeat transition hover:border-primary hover:bg-primary/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                    disabled
+                    disabled={isCreating}
                     style={{
                       backgroundImage: `url(${template.imageUrl})`,
                     }}
                     type="button"
+                    onClick={() => onTemplateClick(template.label, "")}
                   />
                   <p className="truncate text-sm font-medium text-foreground">
                     {template.label}

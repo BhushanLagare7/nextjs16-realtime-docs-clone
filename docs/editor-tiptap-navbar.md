@@ -25,3 +25,5 @@ The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above
 5. **Menubar Styling & Token Conventions**:
    - Menubar triggers and items use semantic tokens (`hover:bg-muted`, `focus:bg-accent focus:text-accent-foreground`).
    - SVG icons inside Menubar items automatically scale to `size-4` via built-in item selector rules (`[&_svg:not([class*='size-'])]:size-4`).
+6. **Multi-Tenant User & Organization Controls**:
+   - Houses `<OrganizationSwitcher />` and `<UserButton />` from `@clerk/nextjs` in a right-aligned flex group (`flex items-center gap-3 pl-6`) allowing users to switch organizations or personal workspace context from within an active document.

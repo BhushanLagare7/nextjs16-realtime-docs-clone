@@ -23,6 +23,8 @@ nextjs16-realtime-docs-clone/
 │   ├── toolbar/            # Document editor toolbar controls
 │   ├── ui/                 # shadcn/ui primitive components
 │   ├── convex-client-provider.tsx # Convex client provider
+│   ├── remove-dialog.tsx   # Shared document deletion confirmation dialog
+│   ├── rename-dialog.tsx   # Shared document rename dialog
 │   └── theme-provider.tsx  # Next-themes provider
 ├── constants/              # Application-wide static constants (fonts, margins)
 ├── convex/                 # Convex backend schema, queries, mutations

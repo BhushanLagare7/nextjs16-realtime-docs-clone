@@ -1,14 +1,26 @@
 "use client"
 
-import { useQuery } from "convex/react"
+import { usePaginatedQuery } from "convex/react"
 
 import { api } from "@/convex/_generated/api"
+import { useSearchParam } from "@/hooks/use-search-param"
 
+import { DocumentsTable } from "./documents-table"
 import { Navbar } from "./navbar"
 import { TemplatesGallery } from "./templates-gallery"
 
+/**
+ * Home page: displays the navbar, templates gallery, and a paginated
+ * list of the current user's documents.
+ */
 export default function Home() {
-  const documents = useQuery(api.documents.get)
+  const [search] = useSearchParam()
+  // Fetch documents in pages of 5, loading more as requested
+  const { loadMore, results, status } = usePaginatedQuery(
+    api.documents.get,
+    { search },
+    { initialNumItems: 5 }
+  )
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -17,13 +29,11 @@ export default function Home() {
       </div>
       <div className="mt-16">
         <TemplatesGallery />
-        {documents === undefined ? (
-          <p>Loading...</p>
-        ) : (
-          documents.map((document) => (
-            <span key={document._id}>{document.title}</span>
-          ))
-        )}
+        <DocumentsTable
+          documents={results}
+          loadMore={loadMore}
+          status={status}
+        />
       </div>
     </div>
   )
