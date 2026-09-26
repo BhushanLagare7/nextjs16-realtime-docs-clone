@@ -36,7 +36,7 @@ This document establishes the styling standards, Tailwind CSS v4 class merging r
    - Never use hardcoded hex values (e.g., `#FAFBFD`, `#C7C7C7`, `#ffffff`), RGB/HSL, or raw Tailwind color utility classes (e.g., `bg-white`, `text-black`, `text-blue-500`, `dark:bg-zinc-900`).
    - All styling must strictly utilize established semantic tokens or theme CSS variables (`bg-background`, `text-foreground`, `bg-card`, `text-card-foreground`, `bg-muted`, `text-muted-foreground`, `border-border`, `text-primary`, `bg-secondary`, etc.).
    - **Exceptions**:
-     - Collaborator cursor labels (`.collaboration-cursor__label`) may use fixed white text (`#ffffff`) for contrast against saturated collaborator colors.
+     - Collaborator cursor labels (`.collaboration-carets__label`) may use fixed white text (`#ffffff`) for contrast against saturated collaborator colors.
      - Document canvas print styles may use `print:bg-white` and `print:text-black` to guarantee standard physical paper output regardless of the active screen theme.
      - User-authored document text/highlight marks and color picker palette matrices (`GOOGLE_DOCS_PALETTE`) representing arbitrary user content or input values (not UI component chrome or layout surfaces).
    - Full theming architecture and token pairing rules are documented in [`docs/theming-tokens.md`](theming-tokens.md).

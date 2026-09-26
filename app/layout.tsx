@@ -1,4 +1,7 @@
 import "./globals.css"
+import "@liveblocks/react-tiptap/styles.css"
+import "@liveblocks/react-ui/styles.css"
+import "@liveblocks/react-ui/styles/dark/attributes.css"
 
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"

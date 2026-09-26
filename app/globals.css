@@ -281,3 +281,21 @@
     @apply size-4;
   }
 }
+
+/* Responsive Liveblocks collaborative threads */
+.floating-threads {
+  @apply hidden max-sm:block;
+}
+
+.anchored-threads {
+  @apply absolute top-4 left-full ml-4 block w-75 max-sm:hidden;
+}
+
+/* Multiplayer Presence Cursors (docs/theming-editor.md) */
+.collaboration-carets__caret {
+  @apply pointer-events-none relative -mx-px border-l-2 border-l-(--cursor-color) [word-break:normal];
+}
+
+.collaboration-carets__label {
+  @apply pointer-events-none absolute top-[-1.4em] -left-0.5 rounded-[3px] bg-(--cursor-color) px-1 py-px text-[11px] leading-normal font-semibold whitespace-nowrap text-white select-none;
+}
