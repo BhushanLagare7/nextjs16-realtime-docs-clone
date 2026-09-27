@@ -16,11 +16,11 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 │   │   ┌────────────────────────────────────────┐   │   │
 │   │   │   RoomProvider (Document Room)         │   │   │
 │   │   │   ┌────────────────────────────────┐   │   │   │
-│   │   │   │ ClientSideSuspense             │   │   │   │
+│   │   │   │ Navbar (Avatars Stack)         │   │   │   │
+│   │   │   │ Toolbar                        │   │   │   │
 │   │   │   │ ┌────────────────────────────┐ │   │   │   │
-│   │   │   │ │ Navbar (Avatars Stack)     │ │   │   │   │
-│   │   │   │ │ Toolbar                    │ │   │   │   │
-│   │   │   │ │ Document Editor (Tiptap)   │ │   │   │   │
+│   │   │   │ │ ClientSideSuspense         │ │   │   │   │
+│   │   │   │ │ └─ Document Editor (Tiptap)│ │   │   │   │
 │   │   │   │ └────────────────────────────┘ │   │   │   │
 │   │   │   └────────────────────────────────┘   │   │   │
 │   │   └────────────────────────────────────────┘   │   │
@@ -31,10 +31,12 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 ### Room Wrapper Pattern (`app/documents/[documentId]/room.tsx`)
 
 - **Root Page Wrapper**: `DocumentIdPage` wraps the entire page hierarchy in `<Room key={documentId} roomId={documentId}>` so Navbar and Editor share room context. Re-exported by `app/room.tsx` for backwards compatibility.
-- **User Directory Fetching**: On mount, calls the `getUsers()` Server Action (`actions.ts`) to fetch Clerk organization members via `clerk.users.getUserList({ organizationId })`.
+- **Scoped Suspense Boundary**: `ClientSideSuspense` wraps only descendants that require Liveblocks data (`DocumentEditor`), rendering `Navbar` and `Toolbar` outside the loading boundary so they remain visible while the editor loads.
+- **User Directory Fetching**: Calls the `getUsers(documentId)` Server Action (`actions.ts`), checking document access via Convex `api.documents.getById` and paginating all members of the target organization.
 - **User & Mention Resolution**:
-  - `resolveUsers({ userIds })`: Maps IDs to `{ name, avatar }` from the organization user pool for threads and presence.
+  - `resolveUsers({ userIds })`: Asynchronously awaits directory loading before mapping IDs to `{ name, avatar }` to prevent caching `undefined` results.
   - `resolveMentionSuggestions({ text })`: Filters organization members by matching substring in mentions.
+  - **Cache Invalidation**: `DirectoryCacheInvalidator` triggers `client.resolvers.invalidateUsers()` and `client.resolvers.invalidateMentionSuggestions()` whenever loaded directory users change.
 
 ---
 
@@ -42,7 +44,8 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 
 - **Avatar Stack (`app/documents/[documentId]/avatars.tsx`)**:
   - Consumes `useOthers()` and `useSelf()` from `@liveblocks/react/suspense`.
-  - Renders current user ("You") alongside active collaborators in an overlapping negative-margin stack (`-ml-2`).
+  - Renders current user ("You") alongside active collaborators in an overlapping negative-margin stack (`-ml-2`). Even when `useOthers()` is empty, the current user avatar is rendered.
+  - Separator is shown only when collaborator avatars (`users.length > 0`) are present.
   - Wrapped in `<ClientSideSuspense fallback={null}>` to prevent layout shift while connection initializes.
   - Features CSS hover tooltip displaying collaborator names (`group-hover:opacity-100`).
   - Follows semantic token styling (`border-background bg-muted text-background bg-foreground`).

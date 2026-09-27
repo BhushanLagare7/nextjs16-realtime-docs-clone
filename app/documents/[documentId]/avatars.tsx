@@ -38,7 +38,9 @@ function AvatarStack() {
   const users = useOthers()
   const currentUser = useSelf()
 
-  if (users.length === 0) return null
+  const hasCollaborators = users.length > 0
+
+  if (!currentUser && !hasCollaborators) return null
 
   return (
     <>
@@ -56,7 +58,7 @@ function AvatarStack() {
           })}
         </div>
       </div>
-      <Separator className="h-6" orientation="vertical" />
+      {hasCollaborators && <Separator className="h-6" orientation="vertical" />}
     </>
   )
 }

@@ -5,23 +5,37 @@ import "@liveblocks/react-ui/styles/dark/attributes.css"
 import "@liveblocks/react-tiptap/styles.css"
 
 import type { ReactNode } from "react"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useParams } from "next/navigation"
 
 import {
   ClientSideSuspense,
   LiveblocksProvider,
   RoomProvider,
+  useClient,
 } from "@liveblocks/react/suspense"
 import { toast } from "sonner"
 
-import { FullscreenLoader } from "@/components/fullscreen-loader"
-
 import { getUsers, type User } from "./actions"
+
+export { ClientSideSuspense }
 
 interface RoomProps {
   children: ReactNode
   roomId?: string
+}
+
+function DirectoryCacheInvalidator({ users }: { users: User[] }) {
+  const client = useClient()
+
+  useEffect(() => {
+    if (users.length > 0) {
+      client.resolvers.invalidateUsers()
+      client.resolvers.invalidateMentionSuggestions?.()
+    }
+  }, [client, users])
+
+  return null
 }
 
 /**
@@ -33,11 +47,19 @@ export function Room({ children, roomId }: RoomProps) {
   const id = roomId ?? params?.documentId ?? ""
 
   const [users, setUsers] = useState<User[]>([])
+  const usersPromiseRef = useRef<Promise<User[]> | null>(null)
+
+  const fetchUsers = useCallback((docId: string) => {
+    if (!usersPromiseRef.current) {
+      usersPromiseRef.current = getUsers(docId)
+    }
+    return usersPromiseRef.current
+  }, [])
 
   useEffect(() => {
     let isMounted = true
 
-    getUsers()
+    fetchUsers(id)
       .then((list) => {
         if (isMounted) {
           setUsers(list)
@@ -50,16 +72,25 @@ export function Room({ children, roomId }: RoomProps) {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [id, fetchUsers])
 
   return (
     <LiveblocksProvider
       authEndpoint="/api/liveblocks-auth"
-      resolveMentionSuggestions={({ text }) => {
-        let filteredUsers = users
+      resolveMentionSuggestions={async ({ text }) => {
+        let currentUsers = users
+        if (currentUsers.length === 0 && id) {
+          try {
+            currentUsers = await fetchUsers(id)
+          } catch {
+            currentUsers = []
+          }
+        }
+
+        let filteredUsers = currentUsers
 
         if (text) {
-          filteredUsers = users.filter((user) =>
+          filteredUsers = currentUsers.filter((user) =>
             user.name.toLowerCase().includes(text.toLowerCase())
           )
         }
@@ -67,9 +98,18 @@ export function Room({ children, roomId }: RoomProps) {
         return filteredUsers.map((user) => user.id)
       }}
       resolveRoomsInfo={() => []}
-      resolveUsers={({ userIds }) => {
+      resolveUsers={async ({ userIds }) => {
+        let currentUsers = users
+        if (currentUsers.length === 0 && id) {
+          try {
+            currentUsers = await fetchUsers(id)
+          } catch {
+            currentUsers = []
+          }
+        }
+
         return userIds.map((userId) => {
-          const user = users.find((u) => u.id === userId)
+          const user = currentUsers.find((u) => u.id === userId)
           if (!user) return undefined
           return {
             name: user.name,
@@ -79,12 +119,9 @@ export function Room({ children, roomId }: RoomProps) {
       }}
       throttle={16}
     >
+      <DirectoryCacheInvalidator users={users} />
       <RoomProvider id={id} initialPresence={{ cursor: null }}>
-        <ClientSideSuspense
-          fallback={<FullscreenLoader label="Room loading…" />}
-        >
-          {children}
-        </ClientSideSuspense>
+        {children}
       </RoomProvider>
     </LiveblocksProvider>
   )

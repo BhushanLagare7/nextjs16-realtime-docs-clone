@@ -1,6 +1,8 @@
+import { FullscreenLoader } from "@/components/fullscreen-loader"
+
 import { DocumentEditor } from "./editor"
 import { Navbar } from "./navbar"
-import { Room } from "./room"
+import { ClientSideSuspense, Room } from "./room"
 import { Toolbar } from "./toolbar"
 
 interface DocumentIdPageProps {
@@ -23,7 +25,11 @@ export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
           <Toolbar />
         </div>
         <div className="flex min-h-screen flex-col pt-28.5 print:pt-0">
-          <DocumentEditor documentId={documentId} />
+          <ClientSideSuspense
+            fallback={<FullscreenLoader label="Room loading…" />}
+          >
+            <DocumentEditor documentId={documentId} />
+          </ClientSideSuspense>
         </div>
       </div>
     </Room>

@@ -1,3 +1,3 @@
 "use client"
 
-export { Room } from "@/app/documents/[documentId]/room"
+export { ClientSideSuspense, Room } from "@/app/documents/[documentId]/room"
