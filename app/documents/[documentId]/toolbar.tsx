@@ -50,6 +50,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { MAX_FONT_SIZE, MIN_FONT_SIZE } from "@/extensions/font-size"
 import { cn } from "@/lib/utils"
 import { useEditorStore } from "@/store/use-editor-store"
@@ -61,9 +67,12 @@ interface ToolbarButtonProps {
   isActive?: boolean
   /** Icon component to render inside the button */
   icon: LucideIcon
+  /** Accessible name for screen readers; falls back to `label` if omitted */
   "aria-label"?: string
   /** Human-readable label fallback for aria-label */
   label?: string
+  /** Descriptive tooltip text to show on hover */
+  tooltip?: string
 }
 
 /** Small icon-only button used within the editor toolbar */
@@ -73,24 +82,36 @@ function ToolbarButton({
   isActive,
   label,
   onClick,
+  tooltip,
 }: ToolbarButtonProps) {
+  const tooltipText = tooltip ?? label ?? ariaLabel
+
   return (
-    <button
-      aria-label={ariaLabel ?? label}
-      className={cn(
-        "flex h-7 min-w-7 items-center justify-center rounded-sm text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
-        isActive && "bg-muted-foreground/20"
-      )}
-      onClick={onClick}
-    >
-      <Icon className="size-4" />
-    </button>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          aria-label={ariaLabel ?? label}
+          className={cn(
+            "flex h-7 min-w-7 items-center justify-center rounded-sm text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
+            isActive && "bg-muted-foreground/20"
+          )}
+          onClick={onClick}
+        >
+          <Icon className="size-4" />
+        </button>
+      </TooltipTrigger>
+      {tooltipText && <TooltipContent>{tooltipText}</TooltipContent>}
+    </Tooltip>
   )
 }
 
+/** A selectable heading option shown in the heading level dropdown */
 interface HeadingOption {
+  /** Display text shown in the dropdown */
   label: string
+  /** Heading level to apply, or `0` for normal paragraph text */
   value: 0 | Level
+  /** Font size (CSS value) used to preview the option in the dropdown */
   fontSize: string
 }
 
@@ -100,6 +121,7 @@ interface HeadingOption {
  */
 function HeadingLevelButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
 
   const headings: HeadingOption[] = [
     { label: "Normal text", value: 0, fontSize: "16px" },
@@ -110,6 +132,7 @@ function HeadingLevelButton() {
     { label: "Heading 5", value: 5, fontSize: "16px" },
   ]
 
+  /** Returns a human-readable label for the currently active heading level */
   const getCurrentHeading = (): string => {
     for (let level = 1; level <= 5; level++) {
       if (editor?.isActive("heading", { level })) {
@@ -121,16 +144,21 @@ function HeadingLevelButton() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Text heading level"
-          className="flex h-7 w-30 shrink-0 items-center justify-between overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        >
-          <span className="truncate">{getCurrentHeading()}</span>
-          <ChevronDownIcon className="ml-2 size-4 shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Text heading level"
+              className="flex h-7 w-30 shrink-0 items-center justify-between overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            >
+              <span className="truncate">{getCurrentHeading()}</span>
+              <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Styles</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
         {headings.map(({ fontSize, label, value }) => {
           const isHeadingActive =
@@ -184,6 +212,10 @@ function FontSizeButton() {
     setInputValue(currentFontSize)
   }
 
+  /**
+   * Validates and applies a new font size to the editor.
+   * Reverts to the previous value if the input is invalid or out of range.
+   */
   const updateFontSize = (newSize: string) => {
     const trimmed = newSize.trim()
     if (!/^\d+$/.test(trimmed)) {
@@ -236,14 +268,19 @@ function FontSizeButton() {
 
   return (
     <div className="flex items-center gap-x-0.5">
-      <button
-        aria-label="Decrease font size"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        type="button"
-        onClick={decrement}
-      >
-        <MinusIcon className="size-4" />
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            aria-label="Decrease font size"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            type="button"
+            onClick={decrement}
+          >
+            <MinusIcon className="size-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Decrease font size</TooltipContent>
+      </Tooltip>
       {isEditing ? (
         <input
           aria-label="Font size value"
@@ -256,33 +293,46 @@ function FontSizeButton() {
           onKeyDown={handleKeyDown}
         />
       ) : (
-        <button
-          aria-label="Font size"
-          className="flex h-7 w-10 shrink-0 items-center justify-center rounded-sm border border-input text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-          type="button"
-          onClick={() => {
-            setIsEditing(true)
-            setFontSize(currentFontSize)
-            setInputValue(currentFontSize)
-          }}
-        >
-          {currentFontSize}
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              aria-label="Font size"
+              className="flex h-7 w-10 shrink-0 items-center justify-center rounded-sm border border-input text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+              type="button"
+              onClick={() => {
+                setIsEditing(true)
+                setFontSize(currentFontSize)
+                setInputValue(currentFontSize)
+              }}
+            >
+              {currentFontSize}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Font size</TooltipContent>
+        </Tooltip>
       )}
-      <button
-        aria-label="Increase font size"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        type="button"
-        onClick={increment}
-      >
-        <PlusIcon className="size-4" />
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            aria-label="Increase font size"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            type="button"
+            onClick={increment}
+          >
+            <PlusIcon className="size-4" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>Increase font size</TooltipContent>
+      </Tooltip>
     </div>
   )
 }
 
+/** A selectable font option shown in the font family dropdown */
 interface FontOption {
+  /** Display text shown in the dropdown */
   label: string
+  /** CSS font-family value applied to selected text */
   value: string
 }
 
@@ -291,6 +341,7 @@ interface FontOption {
  */
 function FontFamilyButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
 
   const fonts: FontOption[] = [
     { label: "Arial", value: "Arial" },
@@ -301,19 +352,24 @@ function FontFamilyButton() {
   ]
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Font family"
-          className="flex h-7 w-30 shrink-0 items-center justify-between overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        >
-          <span className="truncate">
-            {(editor?.getAttributes("textStyle")?.fontFamily as
-              string | undefined) || "Arial"}
-          </span>
-          <ChevronDownIcon className="ml-2 size-4 shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Font family"
+              className="flex h-7 w-30 shrink-0 items-center justify-between overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            >
+              <span className="truncate">
+                {(editor?.getAttributes("textStyle")?.fontFamily as
+                  string | undefined) || "Arial"}
+              </span>
+              <ChevronDownIcon className="ml-2 size-4 shrink-0" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Font</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
         {fonts.map(({ label, value }) => {
           const isFontActive =
@@ -364,6 +420,7 @@ function TextColorButton() {
       isResetActive={!hasColor}
       resetLabel="Default"
       resetType="default"
+      tooltip="Text color"
       value={currentColor}
       onChange={onChange}
       onReset={onReset}
@@ -408,6 +465,7 @@ function HighlightColorButton() {
       isResetActive={!isHighlighted}
       resetLabel="None"
       resetType="none"
+      tooltip="Highlight color"
       value={isHighlighted ? currentColor : "#ffff00"}
       onChange={onChange}
       onReset={onReset}
@@ -434,6 +492,7 @@ function HighlightColorButton() {
  */
 function ImageButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const imageButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -442,6 +501,7 @@ function ImageButton() {
     editor?.chain().focus().setImage({ src }).run()
   }
 
+  /** Opens a native file picker and inserts the selected image as an object URL */
   const onUpload = () => {
     const input = document.createElement("input")
     input.type = "file"
@@ -468,16 +528,21 @@ function ImageButton() {
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            ref={imageButtonRef}
-            aria-label="Insert image"
-            className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-          >
-            <ImageIcon className="size-4" />
-          </button>
-        </DropdownMenuTrigger>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <Tooltip open={open ? false : undefined}>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <button
+                ref={imageButtonRef}
+                aria-label="Insert image"
+                className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+              >
+                <ImageIcon className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Insert image</TooltipContent>
+        </Tooltip>
         <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
           <DropdownMenuItem
             className="flex cursor-pointer items-center gap-x-2 rounded-sm px-2 py-1 text-foreground transition-colors hover:bg-muted-foreground/15"
@@ -508,6 +573,7 @@ function ImageButton() {
         <DialogContent
           className="sm:max-w-md"
           onCloseAutoFocus={(e) => {
+            // Return focus to the trigger button instead of the dialog's default target
             e.preventDefault()
             imageButtonRef.current?.focus()
           }}
@@ -545,6 +611,11 @@ function LinkButton() {
   const [value, setValue] = useState("")
   const [open, setOpen] = useState(false)
 
+  /**
+   * Applies or removes a link on the current selection.
+   * An empty value clears the link; otherwise the href is normalized
+   * by prepending `https://` when no protocol or relative path is detected.
+   */
   const onChange = (href: string) => {
     const trimmedHref = href.trim()
 
@@ -587,17 +658,22 @@ function LinkButton() {
         }
       }}
     >
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Insert link"
-          className={cn(
-            "flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
-            editor?.isActive("link") && "bg-muted-foreground/20"
-          )}
-        >
-          <Link2Icon className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Insert link"
+              className={cn(
+                "flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
+                editor?.isActive("link") && "bg-muted-foreground/20"
+              )}
+            >
+              <Link2Icon className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Insert link</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-80 items-center gap-x-2 p-2.5">
         <Input
           className="flex-1"
@@ -623,6 +699,7 @@ function LinkButton() {
  */
 function AlignButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
 
   const alignments = [
     {
@@ -648,15 +725,20 @@ function AlignButton() {
   ]
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Text alignment"
-          className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        >
-          <AlignLeftIcon className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Text alignment"
+              className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            >
+              <AlignLeftIcon className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Align</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
         {alignments.map(({ icon: Icon, label, value }) => {
           const isAlignActive = editor?.isActive({ textAlign: value })
@@ -686,6 +768,7 @@ function AlignButton() {
  */
 function LineHeightButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
 
   const lineHeights = [
     { label: "Default", value: "normal" },
@@ -701,15 +784,20 @@ function LineHeightButton() {
     "normal"
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Line spacing"
-          className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
-        >
-          <ListCollapseIcon className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="Line spacing"
+              className="flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50"
+            >
+              <ListCollapseIcon className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Line spacing</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
         {lineHeights.map(({ label, value }) => {
           const isLineHeightActive =
@@ -739,6 +827,7 @@ function LineHeightButton() {
  */
 function ListButton() {
   const { editor } = useEditorStore()
+  const [open, setOpen] = useState(false)
 
   const lists = [
     {
@@ -759,18 +848,23 @@ function ListButton() {
     editor?.isActive("bulletList") || editor?.isActive("orderedList")
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="List options"
-          className={cn(
-            "flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
-            isAnyListActive && "bg-muted-foreground/20"
-          )}
-        >
-          <ListIcon className="size-4" />
-        </button>
-      </DropdownMenuTrigger>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <Tooltip open={open ? false : undefined}>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild>
+            <button
+              aria-label="List options"
+              className={cn(
+                "flex h-7 min-w-7 shrink-0 items-center justify-center overflow-hidden rounded-sm px-1.5 text-sm text-foreground transition-colors hover:bg-muted-foreground/15 focus-visible:outline-ring/50",
+                isAnyListActive && "bg-muted-foreground/20"
+              )}
+            >
+              <ListIcon className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>List options</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent className="flex w-auto min-w-48 flex-col gap-y-1 p-1">
         {lists.map(({ icon: Icon, isActive, label, onClick }) => (
           <DropdownMenuItem
@@ -803,6 +897,7 @@ export function Toolbar() {
     icon: LucideIcon
     onClick: () => void
     isActive?: boolean
+    tooltip?: string
   }[][] = [
     [
       {
@@ -822,8 +917,10 @@ export function Toolbar() {
       },
       {
         label: "Spell Check",
+        tooltip: "Spelling and grammar check",
         icon: SpellCheckIcon,
         onClick: () => {
+          // Toggle the native spellcheck attribute on the editor's DOM node
           const current = editor?.view.dom.getAttribute("spellcheck")
           editor?.view.dom.setAttribute(
             "spellcheck",
@@ -855,18 +952,21 @@ export function Toolbar() {
     [
       {
         label: "Comment",
+        tooltip: "Add comment",
         icon: MessageSquarePlusIcon,
         onClick: () => editor?.chain().focus().addPendingComment().run(),
         isActive: editor?.isActive("liveblocksCommentMark"),
       },
       {
         label: "List Todo",
+        tooltip: "Checklist",
         icon: ListTodoIcon,
         onClick: () => editor?.chain().focus().toggleTaskList().run(),
         isActive: editor?.isActive("taskList"),
       },
       {
         label: "Remove Formatting",
+        tooltip: "Clear formatting",
         icon: RemoveFormattingIcon,
         onClick: () => editor?.chain().focus().unsetAllMarks().run(),
       },
@@ -874,31 +974,33 @@ export function Toolbar() {
   ]
 
   return (
-    <div className="flex min-h-10 items-center gap-x-0.5 overflow-x-auto rounded-[24px] bg-muted/70 px-2.5 py-0.5 print:hidden">
-      {sections[0].map((item) => (
-        <ToolbarButton key={item.label} {...item} />
-      ))}
-      <Separator className="h-6" orientation="vertical" />
-      <FontFamilyButton />
-      <Separator className="h-6" orientation="vertical" />
-      <HeadingLevelButton />
-      <Separator className="h-6" orientation="vertical" />
-      <FontSizeButton />
-      <Separator className="h-6" orientation="vertical" />
-      {sections[1].map((item) => (
-        <ToolbarButton key={item.label} {...item} />
-      ))}
-      <TextColorButton />
-      <HighlightColorButton />
-      <Separator className="h-6" orientation="vertical" />
-      <LinkButton />
-      <ImageButton />
-      <AlignButton />
-      <LineHeightButton />
-      <ListButton />
-      {sections[2].map((item) => (
-        <ToolbarButton key={item.label} {...item} />
-      ))}
-    </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="flex min-h-10 items-center gap-x-0.5 overflow-x-auto rounded-[24px] bg-muted/70 px-2.5 py-0.5 print:hidden">
+        {sections[0].map((item) => (
+          <ToolbarButton key={item.label} {...item} />
+        ))}
+        <Separator className="h-6" orientation="vertical" />
+        <FontFamilyButton />
+        <Separator className="h-6" orientation="vertical" />
+        <HeadingLevelButton />
+        <Separator className="h-6" orientation="vertical" />
+        <FontSizeButton />
+        <Separator className="h-6" orientation="vertical" />
+        {sections[1].map((item) => (
+          <ToolbarButton key={item.label} {...item} />
+        ))}
+        <TextColorButton />
+        <HighlightColorButton />
+        <Separator className="h-6" orientation="vertical" />
+        <LinkButton />
+        <ImageButton />
+        <AlignButton />
+        <LineHeightButton />
+        <ListButton />
+        {sections[2].map((item) => (
+          <ToolbarButton key={item.label} {...item} />
+        ))}
+      </div>
+    </TooltipProvider>
   )
 }

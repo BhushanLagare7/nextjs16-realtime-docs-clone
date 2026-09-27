@@ -47,6 +47,7 @@ export default defineSchema({
 
 ---
 
-## 3. Mutations, Pagination & Authorization
+## 3. Queries, Mutations & Authorization
 
-Detailed mutation patterns, pagination queries, multi-tenancy invariants, and the authorization guard convention are documented in [`docs/database-mutations.md`](database-mutations.md).
+- Detailed pagination queries, internal lookup queries, and search indexing are documented in [`docs/database-queries.md`](database-queries.md).
+- Detailed mutation patterns, multi-tenancy invariants, and the authorization guard convention are documented in [`docs/database-mutations.md`](database-mutations.md).
