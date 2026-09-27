@@ -28,7 +28,10 @@ export const create = mutation({
   },
 })
 
-/** Returns a paginated list of documents. */
+/**
+ * Returns a paginated list of documents, filtered by search term and/or
+ * scoped to the caller's organization (falling back to personal documents).
+ */
 export const get = query({
   args: {
     paginationOpts: paginationOptsValidator,
@@ -78,7 +81,7 @@ export const get = query({
   },
 })
 
-/** Deletes a document by ID. */
+/** Deletes a document by ID. Requires ownership or org membership. */
 export const removeById = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
@@ -110,7 +113,7 @@ export const removeById = mutation({
   },
 })
 
-/** Updates a document's title. */
+/** Updates a document's title. Requires ownership or org membership. */
 export const updateById = mutation({
   args: { id: v.id("documents"), title: v.string() },
   handler: async (ctx, args) => {
@@ -139,5 +142,13 @@ export const updateById = mutation({
     }
 
     return await ctx.db.patch(args.id, { title: args.title })
+  },
+})
+
+/** Returns a document by ID, or `null` if not found. No auth check (used internally, e.g. by the Liveblocks auth route). */
+export const getById = query({
+  args: { id: v.id("documents") },
+  handler: async (ctx, { id }) => {
+    return await ctx.db.get(id)
   },
 })

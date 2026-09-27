@@ -1,6 +1,6 @@
 # Convex Mutations & Authorization
 
-This document details the query, mutation, pagination, multi-tenancy, and authorization guard patterns for the Convex backend.
+This document details the mutation patterns, multi-tenancy invariants, and authorization guard pattern for the Convex backend. For database queries, reactive pagination, and search indexing, consult [`docs/database-queries.md`](database-queries.md).
 
 ---
 
@@ -35,65 +35,9 @@ export const create = mutation({
 
 ---
 
-## 2. Reactive Pagination Query (`convex/documents.ts`)
+## 2. Document Modification Mutations (`convex/documents.ts`)
 
-Cursor-based reactive pagination uses `paginationOptsValidator` from `"convex/server"`:
-
-```typescript
-export const get = query({
-  args: {
-    paginationOpts: paginationOptsValidator,
-    search: v.optional(v.string()),
-  },
-  handler: async (ctx, { paginationOpts, search }) => {
-    const user = await ctx.auth.getUserIdentity()
-    if (!user) throw new ConvexError("Unauthorized")
-
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined
-
-    if (search && organizationId) {
-      return await ctx.db
-        .query("documents")
-        .withSearchIndex("search_title", (q) =>
-          q.search("title", search).eq("organizationId", organizationId)
-        )
-        .paginate(paginationOpts)
-    }
-
-    if (search) {
-      return await ctx.db
-        .query("documents")
-        .withSearchIndex("search_title", (q) =>
-          q.search("title", search).eq("ownerId", user.subject)
-        )
-        .paginate(paginationOpts)
-    }
-
-    if (organizationId) {
-      return await ctx.db
-        .query("documents")
-        .withIndex("by_organization_id", (q) =>
-          q.eq("organizationId", organizationId)
-        )
-        .paginate(paginationOpts)
-    }
-
-    return await ctx.db
-      .query("documents")
-      .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
-      .paginate(paginationOpts)
-  },
-})
-```
-
-Client components consume paginated queries via `usePaginatedQuery(api.documents.get, { search }, { initialNumItems: 5 })`.
-
----
-
-## 3. Document Modification Mutations (`convex/documents.ts`)
-
-All record-level mutations (`removeById`, `updateById`) enforce the dual ownership check (see § 5) before acting. Canonical pattern:
+All record-level mutations (`removeById`, `updateById`) enforce the dual ownership check (see § 4) before acting. Canonical pattern:
 
 ```typescript
 export const removeById = mutation({
@@ -124,7 +68,7 @@ export const removeById = mutation({
 
 ---
 
-## 4. Multi-Tenancy Invariant
+## 3. Multi-Tenancy Invariant
 
 Documents belong to either:
 
@@ -135,7 +79,7 @@ Queries and search operations must filter strictly by active context to prevent 
 
 ---
 
-## 5. Authorization Guard Pattern
+## 4. Authorization Guard Pattern
 
 All document-scoped mutations (`removeById`, `updateById`, and future mutations) must apply the **dual ownership check**:
 

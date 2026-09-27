@@ -20,6 +20,7 @@ Dropdown selectors in the toolbar (e.g. `FontFamilyButton`, `HeadingLevelButton`
    - Displays a standard 80-color Google Docs swatch matrix, a theme-aware reset option (`Default` / `unsetColor()` for text; `None` / `unsetHighlight()` for highlight), and a collapsible custom spectrum picker with hex input.
    - Text color updates via `editor.chain().focus().setColor(color).run()` on the `textStyle` mark.
    - Highlight color updates via `editor.chain().focus().setHighlight({ color }).run()` on the `highlight` mark.
+   - Supports optional `tooltip` prop (`tooltip?: string`), automatically wrapping the popover trigger in `<Tooltip open={open ? false : undefined}>` to display hover hints while suppressing tooltips when open.
    - Buttons provide explicit `aria-label` attributes (`"Text color"`, `"Highlight color"`) and adhere to semantic tokens (`text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`).
 5. **Heading Level Idempotency**:
    - In heading dropdown selectors, always execute `editor.chain().focus().setHeading({ level }).run()` instead of `toggleHeading({ level })`. Selecting an already-active level in a selection menu must keep the block at that heading level instead of reverting it back to a normal paragraph.
@@ -49,3 +50,6 @@ Dropdown selectors in the toolbar (e.g. `FontFamilyButton`, `HeadingLevelButton`
     - Executes `editor.chain().focus().addPendingComment().run()` from `@liveblocks/react-tiptap` to anchor a new comment composer to the user's active selection.
     - Reflects active selection status via `editor.isActive("liveblocksCommentMark")` with active token highlights (`bg-muted-foreground/20`).
     - Adheres strictly to semantic styling tokens (`text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`) and provides an accessible `aria-label="Comment"`.
+12. **Dropdown & Popover Tooltip Suppression Pattern**:
+    - Every dropdown menu, popover, or dialog trigger in the toolbar nests inside a `<Tooltip open={open ? false : undefined}>`.
+    - Explicitly setting `open={false}` while the control is open prevents tooltips from remaining visible on screen or re-triggering upon hover while the user interacts with the menu or dialog content.

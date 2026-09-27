@@ -12,6 +12,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
 /**
@@ -140,6 +145,8 @@ export interface ColorPickerProps {
   resetType?: "default" | "none"
   /** Currently selected color in hex format */
   value: string
+  /** Optional hover tooltip for the trigger */
+  tooltip?: string
   /** Callback fired when a color is selected */
   onChange: (color: string) => void
   /** Callback fired when the reset option is clicked */
@@ -158,6 +165,7 @@ export function ColorPicker({
   onReset,
   resetLabel,
   resetType = "none",
+  tooltip,
   value,
 }: ColorPickerProps) {
   const [open, setOpen] = React.useState(false)
@@ -168,8 +176,10 @@ export function ColorPicker({
     ? normalizedCurrent
     : "#000000"
 
+  // Draft color used by the custom spectrum picker before being applied.
   const [draftColor, setDraftColor] = React.useState(safeCustomColor)
 
+  /** Resets the draft color to the current value whenever the popover opens. */
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen) {
       setDraftColor(safeCustomColor)
@@ -177,19 +187,30 @@ export function ColorPicker({
     setOpen(nextOpen)
   }
 
+  /** Applies a swatch/custom color selection and closes the popover. */
   const handleSwatchSelect = (color: string) => {
     onChange(color)
     setOpen(false)
   }
 
+  /** Triggers the reset callback and closes the popover. */
   const handleResetSelect = () => {
     onReset?.()
     setOpen(false)
   }
 
+  const trigger = <PopoverTrigger asChild>{children}</PopoverTrigger>
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      {tooltip ? (
+        <Tooltip open={open ? false : undefined}>
+          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+          <TooltipContent>{tooltip}</TooltipContent>
+        </Tooltip>
+      ) : (
+        trigger
+      )}
       <PopoverContent
         align="start"
         aria-label={ariaLabel}

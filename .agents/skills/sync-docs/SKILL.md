@@ -10,7 +10,7 @@ Use this skill when the user asks to "sync docs", perform a "Knowledge Synchroni
 ## Workflow
 
 1. **Analyze the Diff:**
-   - Run `git status` and `git diff` (or compare against base branch e.g. `git diff main...HEAD`) to inspect code changes, architectural decisions, and review comments addressed in the session.
+   - Run `git status` and inspect all changes via `git diff HEAD` (or `git diff` + `git diff --staged`, or branch diff `git diff main...HEAD`) to capture staged, unstaged, and recent commit changes.
 2. **Identify Learnings:**
    - Determine what reusable patterns, conventions, gotchas, or non-obvious rules were established or modified.
    - **Important:** If no new reusable conventions were established, explicitly report that no documentation updates were required and stop.
@@ -19,22 +19,26 @@ Use this skill when the user asks to "sync docs", perform a "Knowledge Synchroni
      - `architecture-*.md` (System design, stack, directory layout, client/server boundaries)
      - `code-conventions-*.md` (TypeScript rules, ESLint, import sorting, JSX props, Tailwind styling, a11y)
      - `nextjs-react-conventions.md` (App router, async params, React 19 patterns)
+     - `dashboard-*.md` (Home route layout, search input with nuqs, template gallery)
      - `editor-tiptap-*.md` (Core schema, extensions, canvas/ruler, toolbar, dropdown controls, navbar)
      - `realtime-collaboration-*.md` (Liveblocks room, presence cursors, comments, auth route)
-     - `database-conventions.md` (Convex schema, queries, mutations, multi-tenancy)
+     - `database-*.md` (Convex schema, queries, mutations, multi-tenancy)
      - `theming-*.md` (Architecture, OKLCH tokens, editor, prose, integrations, components, controls)
      - `development-workflow.md` (Scripts, linting, git commit conventions)
    - Append or update the relevant file with concise, token-optimized bullet points or tables.
-4. **Create (if necessary):**
-   - If the learning belongs to a completely new domain or category, create a new `docs/[topic]-[subtopic].md` file adhering to the existing modular format.
-5. **Sync the Index:**
-   - If a new doc was created, update the `Documentation Router` table in [AGENTS.md](file:///Users/blagare/Desktop/Next%20JS%20Learning/nextjs16-realtime-docs-clone/AGENTS.md) with the document path and a concise 1-sentence summary of what it covers.
-6. **Verify Formatting:**
-   - Run `npm run format:check` (or `npx prettier --write <file>`) to ensure updated markdown files conform to project styling standards.
+4. **Create or Split (if necessary):**
+   - If the learning belongs to a completely new domain, or if an existing document grows beyond 120 lines, break it down into logically named sub-files (`docs/[topic]-[subtopic].md`) adhering to the modular format.
+5. **Sync the Indexes:**
+   - Whenever a doc is created or split:
+     - Update the `Documentation Router` table in `AGENTS.md` with the document path and a concise 1-sentence summary.
+     - Update any related parent/overview documents (e.g. `docs/database-conventions.md`) that cross-reference the topic.
+6. **Format & Verify:**
+   - Proactively format updated markdown files via `npx prettier --write <touched-files>`.
+   - Run the full verification suite before finishing: `npm run format:check && npm run lint && npm run typecheck`.
 
 ## Constraints
 
 - Focus strictly on high-level reusable rules, patterns, and architectural conventions—never document one-off feature requirements or ephemeral bug details.
 - Keep the language minimal, crisp, and token-efficient.
-- If any documentation file grows beyond 120 lines, automatically break it down into logically named sub-files and register the new references in `AGENTS.md`.
+- Maintain the strict < 120 lines limit per documentation file.
 - Explicitly state which documentation files were updated or created and summarize the added rules.
