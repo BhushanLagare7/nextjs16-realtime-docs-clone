@@ -44,3 +44,8 @@ Dropdown selectors in the toolbar (e.g. `FontFamilyButton`, `HeadingLevelButton`
     - Renders options inside a standard dropdown menu (`w-auto min-w-48 flex-col gap-y-1 p-1`) using `<DropdownMenuItem>` with single-line labels (`whitespace-nowrap`).
     - Detects active line height via `editor.getAttributes("paragraph").lineHeight` or `editor.getAttributes("heading").lineHeight` (defaulting to `"normal"`), applying active token highlights (`bg-muted-foreground/20`).
     - Adheres strictly to semantic styling tokens (`text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`) and provides an accessible `aria-label="Line spacing"`.
+11. **Collaborative Comment Action**:
+    - Comment action renders a toolbar button using `MessageSquarePlusIcon` (`lucide-react`).
+    - Executes `editor.chain().focus().addPendingComment().run()` from `@liveblocks/react-tiptap` to anchor a new comment composer to the user's active selection.
+    - Reflects active selection status via `editor.isActive("liveblocksCommentMark")` with active token highlights (`bg-muted-foreground/20`).
+    - Adheres strictly to semantic styling tokens (`text-foreground hover:bg-muted-foreground/15 focus-visible:outline-ring/50`) and provides an accessible `aria-label="Comment"`.
