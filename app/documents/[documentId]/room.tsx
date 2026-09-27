@@ -16,7 +16,9 @@ import {
 } from "@liveblocks/react/suspense"
 import { toast } from "sonner"
 
-import { getUsers, type User } from "./actions"
+import type { Id } from "@/convex/_generated/dataModel"
+
+import { getDocuments, getUsers, type User } from "./actions"
 
 export { ClientSideSuspense }
 
@@ -76,7 +78,20 @@ export function Room({ children, roomId }: RoomProps) {
 
   return (
     <LiveblocksProvider
-      authEndpoint="/api/liveblocks-auth"
+      authEndpoint={async () => {
+        const endpoint = "/api/liveblocks-auth"
+        const room = id
+
+        const response = await fetch(endpoint, {
+          body: JSON.stringify({ room }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+        })
+
+        return await response.json()
+      }}
       resolveMentionSuggestions={async ({ text }) => {
         let currentUsers = users
         if (currentUsers.length === 0 && id) {
@@ -97,7 +112,13 @@ export function Room({ children, roomId }: RoomProps) {
 
         return filteredUsers.map((user) => user.id)
       }}
-      resolveRoomsInfo={() => []}
+      resolveRoomsInfo={async ({ roomIds }) => {
+        const documents = await getDocuments(roomIds as Id<"documents">[])
+        return documents.map((document) => ({
+          id: document.id,
+          name: document.name,
+        }))
+      }}
       resolveUsers={async ({ userIds }) => {
         let currentUsers = users
         if (currentUsers.length === 0 && id) {

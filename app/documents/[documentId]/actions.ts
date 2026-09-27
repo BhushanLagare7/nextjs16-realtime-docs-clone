@@ -15,6 +15,18 @@ export interface User {
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 
 /**
+ * Server action to fetch document summaries by ID for Liveblocks room info resolution.
+ */
+export async function getDocuments(ids: Id<"documents">[]) {
+  const { getToken } = await auth()
+  const token = await getToken({ template: "convex" })
+  if (token) {
+    convex.setAuth(token)
+  }
+  return await convex.query(api.documents.getByIds, { ids })
+}
+
+/**
  * Server action to fetch all users within the authorized document's organization.
  * Used by Liveblocks to resolve user mentions and collaborator identities.
  */

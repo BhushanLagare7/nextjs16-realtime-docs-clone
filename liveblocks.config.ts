@@ -28,7 +28,11 @@ declare global {
     ThreadMetadata: Record<string, never>
 
     // Custom room info set with resolveRoomsInfo, for useRoomInfo
-    RoomInfo: Record<string, never>
+    RoomInfo: {
+      id?: string
+      name?: string
+      url?: string
+    }
   }
 }
 
