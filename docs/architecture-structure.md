@@ -16,7 +16,7 @@ nextjs16-realtime-docs-clone/
 │   ├── api/
 │   │   └── liveblocks-auth/# Liveblocks authentication endpoint
 │   ├── documents/
-│   │   └── [documentId]/   # Document editor workspace, navbar, toolbar, ruler, room
+│   │   └── [documentId]/   # Document editor workspace, navbar, toolbar, ruler, room, avatars, actions
 │   ├── globals.css         # Global styles and Tailwind v4 theme definitions
 │   └── layout.tsx          # Root layout with font and theme providers
 ├── components/             # Reusable UI components

@@ -105,4 +105,4 @@ export async function POST(req: Request) {
 ## 2. Protected Boundaries
 
 > [!WARNING]
-> Any changes to `liveblocks.config.ts`, `app/api/liveblocks-auth/route.ts`, or `room.tsx` directly impact the multiplayer collaboration contract. Always verify real-time presence across multiple browser tabs after editing these files.
+> Any changes to `liveblocks.config.ts`, `app/api/liveblocks-auth/route.ts`, `app/documents/[documentId]/actions.ts`, or `room.tsx` directly impact the multiplayer collaboration contract. Always verify real-time presence across multiple browser tabs after editing these files.
