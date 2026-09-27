@@ -145,10 +145,33 @@ export const updateById = mutation({
   },
 })
 
-/** Returns a document by ID, or `null` if not found. No auth check (used internally, e.g. by the Liveblocks auth route). */
+/** Returns a document by ID if the caller owns it or has access through its organization. */
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
-    return await ctx.db.get(id)
+    const user = await ctx.auth.getUserIdentity()
+
+    if (!user) {
+      throw new ConvexError("Unauthorized")
+    }
+
+    const document = await ctx.db.get(id)
+
+    if (!document) {
+      return null
+    }
+
+    const isOwner = document.ownerId === user.subject
+    const organizationId = (user.organization_id ?? undefined) as
+      string | undefined
+    const isOrganizationMember = !!(
+      document.organizationId && document.organizationId === organizationId
+    )
+
+    if (!isOwner && !isOrganizationMember) {
+      throw new ConvexError("Unauthorized")
+    }
+
+    return document
   },
 })

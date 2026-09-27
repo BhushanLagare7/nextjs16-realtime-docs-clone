@@ -14,14 +14,14 @@ const liveblocks = new Liveblocks({
  * Saturated, accessible collaborator color palette (>= 4.5:1 contrast against white cursor labels).
  */
 const COLLABORATOR_COLORS = [
-  "#2563eb", // Blue
-  "#dc2626", // Red
-  "#16a34a", // Green
-  "#d97706", // Amber
-  "#7c3aed", // Violet
-  "#db2777", // Pink
-  "#0891b2", // Cyan
-  "#ea580c", // Orange
+  "#2563eb", // Blue (5.17:1)
+  "#dc2626", // Red (4.83:1)
+  "#15803d", // Green (5.02:1)
+  "#b45309", // Amber (5.02:1)
+  "#7c3aed", // Violet (5.70:1)
+  "#db2777", // Pink (4.60:1)
+  "#0e7490", // Cyan (5.36:1)
+  "#c2410c", // Orange (5.18:1)
 ]
 
 /**
@@ -42,7 +42,7 @@ function generateUserColor(userId: string): string {
  * authorizing a write-capable collaboration session.
  */
 export async function POST(req: Request) {
-  const { orgId, sessionClaims } = await auth()
+  const { orgId, sessionClaims, getToken } = await auth()
   if (!sessionClaims) {
     return new Response("Unauthorized", { status: 401 })
   }
@@ -57,9 +57,15 @@ export async function POST(req: Request) {
     return new Response("Unauthorized", { status: 401 })
   }
 
+  const token = await getToken({ template: "convex" })
+  if (!token) {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
   // Fetch the document backing the requested room to check access rights.
   let document = null
   try {
+    convex.setAuth(token)
     document = await convex.query(api.documents.getById, {
       id: room as Id<"documents">,
     })
@@ -84,12 +90,24 @@ export async function POST(req: Request) {
   if (!isOwner && !isOrganizationMember && document.organizationId) {
     try {
       const clerk = await clerkClient()
-      const memberships = await clerk.users.getOrganizationMembershipList({
-        userId: user.id,
-      })
-      isOrganizationMember = memberships.data.some(
-        (membership) => membership.organization.id === document.organizationId
-      )
+      const limit = 100
+      let offset = 0
+      let hasMore = true
+
+      while (hasMore && !isOrganizationMember) {
+        const memberships = await clerk.users.getOrganizationMembershipList({
+          userId: user.id,
+          limit,
+          offset,
+        })
+
+        isOrganizationMember = memberships.data.some(
+          (membership) => membership.organization.id === document.organizationId
+        )
+
+        offset += memberships.data.length
+        hasMore = offset < memberships.totalCount && memberships.data.length > 0
+      }
     } catch {
       // Membership lookup fallback gracefully ignores errors and preserves isOrganizationMember state
     }

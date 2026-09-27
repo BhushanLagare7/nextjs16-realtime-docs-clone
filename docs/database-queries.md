@@ -60,18 +60,41 @@ Client components consume paginated queries via `usePaginatedQuery(api.documents
 
 ---
 
-## 2. Direct Internal Lookup Query (`convex/documents.ts`)
+## 2. Direct Document Lookup Query (`convex/documents.ts`)
 
-The `getById` query provides direct document retrieval by document ID:
+The `getById` query provides direct document retrieval by document ID, enforcing identity authentication and dual-ownership authorization:
 
 ```typescript
 export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
-    return await ctx.db.get(id)
+    const user = await ctx.auth.getUserIdentity()
+
+    if (!user) {
+      throw new ConvexError("Unauthorized")
+    }
+
+    const document = await ctx.db.get(id)
+
+    if (!document) {
+      return null
+    }
+
+    const isOwner = document.ownerId === user.subject
+    const organizationId = (user.organization_id ?? undefined) as
+      string | undefined
+    const isOrganizationMember = !!(
+      document.organizationId && document.organizationId === organizationId
+    )
+
+    if (!isOwner && !isOrganizationMember) {
+      throw new ConvexError("Unauthorized")
+    }
+
+    return document
   },
 })
 ```
 
-- **No Caller Auth Guard**: Intentionally avoids caller authentication guards so that internal server-side callers (e.g. `ConvexHttpClient` in `/api/liveblocks-auth`) can fetch document metadata to perform downstream authorization checks.
-- **Client Caution**: Client components must not use `getById` as a substitute for authorized endpoints.
+- **Enforced Access Contract**: Requires an authenticated identity (`ctx.auth.getUserIdentity()`). Returns the document only when the caller owns it (`ownerId === user.subject`) or has access through the document's organization (`document.organizationId === user.organization_id`). Throws `ConvexError("Unauthorized")` otherwise.
+- **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`) before executing `getById`.

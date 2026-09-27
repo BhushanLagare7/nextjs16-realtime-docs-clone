@@ -9,9 +9,9 @@ This document details the server-side authentication route handler and multiplay
 Liveblocks room access is authorized server-side via a Next.js 16 route handler integrated with Clerk:
 
 1. **Session Verification**: Call `auth()` and `currentUser()` from `@clerk/nextjs/server`.
-2. **Access Control**: Look up the document via `convex.query(api.documents.getById, { id: room })`. Authorize document owner (`document.ownerId === user.id`) or organization members.
-3. **Clerk Org Fallback**: If session claims lack `org_id`, query `clerkClient().users.getOrganizationMembershipList({ userId: user.id })` to verify membership before denying access.
-4. **Deterministic Color Hashing**: Hash `user.id` using a djb2 algorithm into an 8-color collaborator palette for consistent presence cursors.
+2. **Access Control**: Obtain a Convex-compatible Clerk token via `getToken({ template: "convex" })`, authenticate `ConvexHttpClient` via `convex.setAuth(token)`, and look up the document via `convex.query(api.documents.getById, { id: room })`. Authorize document owner (`document.ownerId === user.id`) or organization members.
+3. **Clerk Org Fallback**: If session claims lack `org_id`, paginate `clerkClient().users.getOrganizationMembershipList({ userId: user.id })` to verify membership across all user organizations before denying access.
+4. **Deterministic Color Hashing**: Hash `user.id` using a djb2 algorithm into an 8-color collaborator palette (>= 4.5:1 contrast against white cursor labels) for consistent presence cursors.
 5. **Session Authorization**: Authorize the session with `liveblocks.prepareSession()`, grant write permissions with `session.allow(room, ["*:write"])`, and return `{ body, status }`:
 
 ```typescript
@@ -28,37 +28,58 @@ const liveblocks = new Liveblocks({
 })
 
 export async function POST(req: Request) {
-  const { orgId, sessionClaims } = await auth()
+  const { orgId, sessionClaims, getToken } = await auth()
+  if (!sessionClaims) return new Response("Unauthorized", { status: 401 })
+
   const user = await currentUser()
-  if (!sessionClaims || !user)
-    return new Response("Unauthorized", { status: 401 })
+  if (!user) return new Response("Unauthorized", { status: 401 })
 
   const { room } = (await req.json()) as { room?: string }
   if (!room) return new Response("Unauthorized", { status: 401 })
 
-  const document = await convex
-    .query(api.documents.getById, {
+  const token = await getToken({ template: "convex" })
+  if (!token) return new Response("Unauthorized", { status: 401 })
+
+  let document = null
+  try {
+    convex.setAuth(token)
+    document = await convex.query(api.documents.getById, {
       id: room as Id<"documents">,
     })
-    .catch(() => null)
+  } catch {
+    return new Response("Unauthorized", { status: 401 })
+  }
+
   if (!document) return new Response("Unauthorized", { status: 401 })
 
   const isOwner = document.ownerId === user.id
+  const sessionOrgId = (sessionClaims as Record<string, unknown>).org_id as
+    string | undefined
   let isOrgMember = !!(
     document.organizationId &&
-    (document.organizationId === sessionClaims.org_id ||
+    (document.organizationId === sessionOrgId ||
       document.organizationId === orgId)
   )
 
   if (!isOwner && !isOrgMember && document.organizationId) {
     try {
       const clerk = await clerkClient()
-      const memberships = await clerk.users.getOrganizationMembershipList({
-        userId: user.id,
-      })
-      isOrgMember = memberships.data.some(
-        (m) => m.organization.id === document.organizationId
-      )
+      const limit = 100
+      let offset = 0
+      let hasMore = true
+
+      while (hasMore && !isOrgMember) {
+        const memberships = await clerk.users.getOrganizationMembershipList({
+          userId: user.id,
+          limit,
+          offset,
+        })
+        isOrgMember = memberships.data.some(
+          (m) => m.organization.id === document.organizationId
+        )
+        offset += memberships.data.length
+        hasMore = offset < memberships.totalCount && memberships.data.length > 0
+      }
     } catch {}
   }
 

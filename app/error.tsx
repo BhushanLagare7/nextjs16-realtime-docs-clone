@@ -17,7 +17,7 @@ interface ErrorPageProps {
 /**
  * Root error boundary page rendered when an unhandled runtime error occurs.
  */
-export default function ErrorPage({ error, reset }: ErrorPageProps) {
+export default function ErrorPage({ reset }: ErrorPageProps) {
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center space-y-6 bg-background text-foreground"
@@ -33,7 +33,9 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
           <h2 className="text-xl font-semibold text-foreground">
             Something went wrong
           </h2>
-          <p className="text-muted-foreground">{error.message}</p>
+          <p className="text-muted-foreground">
+            An unexpected error occurred. Please try again.
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-x-3">
