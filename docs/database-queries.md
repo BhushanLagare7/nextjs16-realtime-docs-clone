@@ -97,4 +97,4 @@ export const getById = query({
 ```
 
 - **Enforced Access Contract**: Requires an authenticated identity (`ctx.auth.getUserIdentity()`). Returns the document only when the caller owns it (`ownerId === user.subject`) or has access through the document's organization (`document.organizationId === user.organization_id`). Throws `ConvexError("Unauthorized")` otherwise.
-- **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`) before executing `getById`.
+- **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`, `app/documents/[documentId]/actions.ts`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`) before executing `getById`.
