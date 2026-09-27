@@ -22,7 +22,7 @@ export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
         <Toolbar />
       </div>
       <div className="flex min-h-screen flex-col pt-28.5 print:pt-0">
-        <Room roomId={documentId}>
+        <Room key={documentId} roomId={documentId}>
           <DocumentEditor documentId={documentId} />
         </Room>
       </div>
