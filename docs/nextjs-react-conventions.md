@@ -23,11 +23,23 @@ export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
 
   if (!token) throw new Error("Unauthorized")
 
-  const preloadedDocument = await preloadQuery(
-    api.documents.getById,
-    { id: documentId },
-    { token }
-  )
+  let preloadedDocument
+  try {
+    preloadedDocument = await preloadQuery(
+      api.documents.getById,
+      { id: documentId },
+      { token }
+    )
+  } catch (error) {
+    if (
+      error instanceof ConvexError &&
+      (error.data === "Document not found" ||
+        error.message === "Document not found")
+    ) {
+      notFound()
+    }
+    throw error
+  }
 
   return <Document preloadedDocument={preloadedDocument} />
 }

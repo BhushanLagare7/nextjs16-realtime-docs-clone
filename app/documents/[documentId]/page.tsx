@@ -1,5 +1,8 @@
+import { notFound } from "next/navigation"
+
 import { auth } from "@clerk/nextjs/server"
 import { preloadQuery } from "convex/nextjs"
+import { ConvexError } from "convex/values"
 
 import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
@@ -26,11 +29,24 @@ export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
     throw new Error("Unauthorized")
   }
 
-  const preloadedDocument = await preloadQuery(
-    api.documents.getById,
-    { id: documentId },
-    { token }
-  )
+  let preloadedDocument
+  try {
+    preloadedDocument = await preloadQuery(
+      api.documents.getById,
+      { id: documentId },
+      { token }
+    )
+  } catch (error) {
+    if (
+      error instanceof ConvexError &&
+      (error.data === "Document not found" ||
+        error.message === "Document not found")
+    ) {
+      notFound()
+    }
+
+    throw error
+  }
 
   return <Document preloadedDocument={preloadedDocument} />
 }

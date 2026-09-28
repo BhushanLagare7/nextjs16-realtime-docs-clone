@@ -35,7 +35,7 @@ The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above
 The document title input (`app/documents/[documentId]/document-input.tsx`) enables inline rename operations with live status indication:
 
 1. **Auto-Expanding Input**: Uses an invisible sizing `<span>` with `whitespace-pre` positioned beneath an `absolute inset-0` transparent input to dynamically match input width to content length (up to `50ch`).
-2. **Debounced Auto-Save (`useDebounce`)**: Typing triggers debounced mutations to `api.documents.updateById` via `useDebounce((newValue) => mutate({ id, title: newValue }), 500)`. Form submission (`Enter` key) immediately commits changes.
+2. **Debounced Auto-Save & Submission Coordination (`useDebounce`)**: Typing triggers debounced mutations to `api.documents.updateById` via `useDebounce((newValue) => mutate({ id, title: newValue }), 500)`. Both input blur (`handleBlur`) and form submission (`handleSubmit`) flush pending debounced updates (`flush()`) before leaving edit mode, preventing duplicate mutations across blur and submission transitions.
 3. **Multi-State Connection & Sync Indicators**:
    - **Saving / Connecting**: Displays `<LoaderIcon className="animate-spin" />` while mutation is pending or Liveblocks status is `connecting` / `reconnecting`.
    - **Disconnected**: Displays `<BsCloudSlash />` when Liveblocks room connection is offline.

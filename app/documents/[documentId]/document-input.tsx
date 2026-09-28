@@ -32,15 +32,17 @@ export function DocumentInput({ id, title }: DocumentInputProps) {
 
   const mutate = useMutation(api.documents.updateById)
 
-  const debouncedUpdate = useDebounce((newValue: string) => {
-    if (newValue === title) return
+  const { debounced: debouncedUpdate, flush } = useDebounce(
+    (newValue: string) => {
+      if (newValue === title) return
 
-    setIsPending(true)
-    mutate({ id, title: newValue })
-      .then(() => toast.success("Document updated"))
-      .catch(() => toast.error("Something went wrong"))
-      .finally(() => setIsPending(false))
-  })
+      setIsPending(true)
+      mutate({ id, title: newValue })
+        .then(() => toast.success("Document updated"))
+        .catch(() => toast.error("Something went wrong"))
+        .finally(() => setIsPending(false))
+    }
+  )
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
@@ -48,17 +50,16 @@ export function DocumentInput({ id, title }: DocumentInputProps) {
     debouncedUpdate(newValue)
   }
 
+  const handleBlur = () => {
+    flush()
+    setIsEditing(false)
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    setIsPending(true)
-    mutate({ id, title: value })
-      .then(() => {
-        toast.success("Document updated")
-        setIsEditing(false)
-      })
-      .catch(() => toast.error("Something went wrong"))
-      .finally(() => setIsPending(false))
+    flush()
+    setIsEditing(false)
   }
 
   const showLoader =
@@ -76,7 +77,7 @@ export function DocumentInput({ id, title }: DocumentInputProps) {
             ref={inputRef}
             className="absolute inset-0 truncate bg-transparent px-1.5 text-lg text-foreground"
             value={value}
-            onBlur={() => setIsEditing(false)}
+            onBlur={handleBlur}
             onChange={onChange}
           />
         </form>
