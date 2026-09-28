@@ -39,7 +39,8 @@ function generateUserColor(userId: string): string {
 /**
  * Liveblocks auth endpoint. Verifies the requesting Clerk user has access
  * (as owner or organization member) to the requested document/room before
- * authorizing a write-capable collaboration session.
+ * authorizing a write-capable collaboration session. When room is undefined,
+ * authorizes the user for project-level notifications.
  */
 export async function POST(req: Request) {
   const { orgId, sessionClaims, getToken } = await auth()
@@ -53,74 +54,76 @@ export async function POST(req: Request) {
   }
 
   const { room } = (await req.json()) as { room?: string }
-  if (!room) {
-    return new Response("Unauthorized", { status: 401 })
-  }
 
-  const token = await getToken({ template: "convex" })
-  if (!token) {
-    return new Response("Unauthorized", { status: 401 })
-  }
-
-  // Fetch the document backing the requested room to check access rights.
-  let document = null
-  try {
-    convex.setAuth(token)
-    document = await convex.query(api.documents.getById, {
-      id: room as Id<"documents">,
-    })
-  } catch {
-    return new Response("Unauthorized", { status: 401 })
-  }
-
-  if (!document) {
-    return new Response("Unauthorized", { status: 401 })
-  }
-
-  const isOwner = document.ownerId === user.id
-  const sessionOrgId = (sessionClaims as Record<string, unknown>).org_id as
-    string | undefined
-  let isOrganizationMember = !!(
-    document.organizationId &&
-    (document.organizationId === sessionOrgId ||
-      document.organizationId === orgId)
-  )
-
-  // Fallback: verify org membership via Clerk API if session claims are stale/missing.
-  if (!isOwner && !isOrganizationMember && document.organizationId) {
-    try {
-      const clerk = await clerkClient()
-      const limit = 100
-      let offset = 0
-      let hasMore = true
-
-      while (hasMore && !isOrganizationMember) {
-        const memberships = await clerk.users.getOrganizationMembershipList({
-          userId: user.id,
-          limit,
-          offset,
-        })
-
-        isOrganizationMember = memberships.data.some(
-          (membership) => membership.organization.id === document.organizationId
-        )
-
-        offset += memberships.data.length
-        hasMore = offset < memberships.totalCount && memberships.data.length > 0
-      }
-    } catch {
-      // Membership lookup fallback gracefully ignores errors and preserves isOrganizationMember state
+  if (room) {
+    const token = await getToken({ template: "convex" })
+    if (!token) {
+      return new Response("Unauthorized", { status: 401 })
     }
-  }
 
-  if (!isOwner && !isOrganizationMember) {
-    return new Response("Unauthorized", { status: 401 })
+    // Fetch the document backing the requested room to check access rights.
+    let document = null
+    try {
+      convex.setAuth(token)
+      document = await convex.query(api.documents.getById, {
+        id: room as Id<"documents">,
+      })
+    } catch {
+      return new Response("Unauthorized", { status: 401 })
+    }
+
+    if (!document) {
+      return new Response("Unauthorized", { status: 401 })
+    }
+
+    const isOwner = document.ownerId === user.id
+    const sessionOrgId = (sessionClaims as Record<string, unknown>).org_id as
+      string | undefined
+    let isOrganizationMember = !!(
+      document.organizationId &&
+      (document.organizationId === sessionOrgId ||
+        document.organizationId === orgId)
+    )
+
+    // Fallback: verify org membership via Clerk API if session claims are stale/missing.
+    if (!isOwner && !isOrganizationMember && document.organizationId) {
+      try {
+        const clerk = await clerkClient()
+        const limit = 100
+        let offset = 0
+        let hasMore = true
+
+        while (hasMore && !isOrganizationMember) {
+          const memberships = await clerk.users.getOrganizationMembershipList({
+            userId: user.id,
+            limit,
+            offset,
+          })
+
+          isOrganizationMember = memberships.data.some(
+            (membership) =>
+              membership.organization.id === document.organizationId
+          )
+
+          offset += memberships.data.length
+          hasMore =
+            offset < memberships.totalCount && memberships.data.length > 0
+        }
+      } catch {
+        // Membership lookup fallback gracefully ignores errors and preserves isOrganizationMember state
+      }
+    }
+
+    if (!isOwner && !isOrganizationMember) {
+      return new Response("Unauthorized", { status: 401 })
+    }
   }
 
   const name =
     user.fullName ?? user.primaryEmailAddress?.emailAddress ?? "Anonymous"
 
   // Grant write access to the room and issue the Liveblocks session token.
+  // When room is undefined, authorizes project-level notifications scope.
   const session = liveblocks.prepareSession(user.id, {
     userInfo: {
       name,
@@ -128,7 +131,9 @@ export async function POST(req: Request) {
       color: generateUserColor(user.id),
     },
   })
-  session.allow(room, ["*:write"])
+  if (room) {
+    session.allow(room, ["*:write"])
+  }
   const { body, status } = await session.authorize()
 
   return new Response(body, { status })

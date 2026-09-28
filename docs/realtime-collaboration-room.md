@@ -33,9 +33,10 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 - **Root Page Wrapper**: `DocumentIdPage` wraps the entire page hierarchy in `<Room key={documentId} roomId={documentId}>` so Navbar and Editor share room context. Re-exported by `app/room.tsx` for backwards compatibility.
 - **Scoped Suspense Boundary**: `ClientSideSuspense` wraps only descendants that require Liveblocks data (`DocumentEditor`), rendering `Navbar` and `Toolbar` outside the loading boundary so they remain visible while the editor loads.
 - **User Directory Fetching**: Calls the `getUsers(documentId)` Server Action (`actions.ts`), checking document access via Convex `api.documents.getById` and paginating all members of the target organization.
-- **User & Mention Resolution**:
+- **User, Room & Mention Resolution**:
   - `resolveUsers({ userIds })`: Asynchronously awaits directory loading before mapping IDs to `{ name, avatar }` to prevent caching `undefined` results.
   - `resolveMentionSuggestions({ text })`: Filters organization members by matching substring in mentions.
+  - `resolveRoomsInfo({ roomIds })`: Batches document IDs via `getDocuments(ids)` server action (`api.documents.getByIds`) to resolve document titles and navigable URLs (`/documents/${document.id}`) for cross-room notifications.
   - **Cache Invalidation**: `DirectoryCacheInvalidator` triggers `client.resolvers.invalidateUsers()` and `client.resolvers.invalidateMentionSuggestions()` whenever loaded directory users change.
 
 ---

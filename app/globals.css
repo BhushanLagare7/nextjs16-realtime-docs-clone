@@ -299,3 +299,8 @@
 .collaboration-carets__label {
   @apply pointer-events-none absolute top-[-1.4em] -left-0.5 rounded-[3px] bg-(--cursor-color) px-1 py-px text-[11px] leading-normal font-semibold whitespace-nowrap text-white select-none;
 }
+
+/* Radix popper content wrapper layering */
+div[data-radix-popper-content-wrapper] {
+  @apply z-50!;
+}

@@ -98,3 +98,27 @@ export const getById = query({
 
 - **Enforced Access Contract**: Requires an authenticated identity (`ctx.auth.getUserIdentity()`). Returns the document only when the caller owns it (`ownerId === user.subject`) or has access through the document's organization (`document.organizationId === user.organization_id`). Throws `ConvexError("Unauthorized")` otherwise.
 - **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`, `app/documents/[documentId]/actions.ts`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`) before executing `getById`.
+
+---
+
+## 3. Batch Document Resolution Query (`convex/documents.ts`)
+
+The `getByIds` query batch-resolves document IDs into ID-title pairs for Liveblocks room info resolution, preserving array order:
+
+```typescript
+export const getByIds = query({
+  args: { ids: v.array(v.id("documents")) },
+  handler: async (ctx, { ids }) => {
+    const documents = []
+    for (const id of ids) {
+      const document = await ctx.db.get(id)
+      documents.push(
+        document
+          ? { id: document._id, name: document.title }
+          : { id, name: "[Removed]" }
+      )
+    }
+    return documents
+  },
+})
+```
