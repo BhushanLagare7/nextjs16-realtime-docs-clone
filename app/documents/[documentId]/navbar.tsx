@@ -3,8 +3,10 @@
 import { BsFilePdf } from "react-icons/bs"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs"
+import { useMutation } from "convex/react"
 import {
   BoldIcon,
   FileIcon,
@@ -23,7 +25,10 @@ import {
   UnderlineIcon,
   Undo2Icon,
 } from "lucide-react"
+import { toast } from "sonner"
 
+import { RemoveDialog } from "@/components/remove-dialog"
+import { RenameDialog } from "@/components/rename-dialog"
 import {
   Menubar,
   MenubarContent,
@@ -36,18 +41,43 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar"
+import { api } from "@/convex/_generated/api"
+import type { Doc } from "@/convex/_generated/dataModel"
 import { useEditorStore } from "@/store/use-editor-store"
 
 import { Avatars } from "./avatars"
 import { DocumentInput } from "./document-input"
 import { Inbox } from "./inbox"
 
+/** Props for the Navbar component. */
+interface NavbarProps {
+  data: Doc<"documents">
+}
+
 /**
  * Top navigation bar providing document branding, title editing, and menu controls.
  */
-export function Navbar() {
+export function Navbar({ data }: NavbarProps) {
+  const router = useRouter()
   const { editor } = useEditorStore()
+  const mutation = useMutation(api.documents.create)
 
+  /** Creates a new blank document and navigates to it. */
+  const onNewDocument = () => {
+    mutation({
+      title: "Untitled document",
+      initialContent: "",
+    })
+      .then((id) => {
+        toast.success("Document created")
+        router.push(`/documents/${id}`)
+      })
+      .catch(() => {
+        toast.error("Something went wrong")
+      })
+  }
+
+  /** Inserts a table with the given number of rows and columns at the cursor position. */
   const insertTable = ({ rows, cols }: { rows: number; cols: number }) => {
     editor
       ?.chain()
@@ -56,6 +86,7 @@ export function Navbar() {
       .run()
   }
 
+  /** Triggers a browser download for the given blob using the provided filename. */
   const onDownload = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -65,6 +96,7 @@ export function Navbar() {
     URL.revokeObjectURL(url)
   }
 
+  /** Exports the current document content as a JSON file. */
   const onSaveJSON = () => {
     if (!editor) return
 
@@ -72,9 +104,10 @@ export function Navbar() {
     const blob = new Blob([JSON.stringify(content)], {
       type: "application/json",
     })
-    onDownload(blob, "document.json") // TODO: Use document name
+    onDownload(blob, `${data.title}.json`)
   }
 
+  /** Exports the current document content as an HTML file. */
   const onSaveHTML = () => {
     if (!editor) return
 
@@ -82,9 +115,10 @@ export function Navbar() {
     const blob = new Blob([content], {
       type: "text/html",
     })
-    onDownload(blob, "document.html") // TODO: Use document name
+    onDownload(blob, `${data.title}.html`)
   }
 
+  /** Exports the current document content as a plain text file. */
   const onSaveText = () => {
     if (!editor) return
 
@@ -92,7 +126,7 @@ export function Navbar() {
     const blob = new Blob([content], {
       type: "text/plain",
     })
-    onDownload(blob, "document.txt") // TODO: Use document name
+    onDownload(blob, `${data.title}.txt`)
   }
 
   return (
@@ -102,7 +136,7 @@ export function Navbar() {
           <Image alt="Logo" height={36} src="/logo.svg" width={36} />
         </Link>
         <div className="flex flex-col">
-          <DocumentInput />
+          <DocumentInput id={data._id} title={data.title} />
           <div className="flex">
             <Menubar className="h-auto border-none bg-transparent p-0 shadow-none">
               <MenubarMenu>
@@ -134,19 +168,29 @@ export function Navbar() {
                       </MenubarItem>
                     </MenubarSubContent>
                   </MenubarSub>
-                  <MenubarItem disabled>
+                  <MenubarItem onClick={onNewDocument}>
                     <FilePlusIcon />
                     New Document
                   </MenubarItem>
                   <MenubarSeparator />
-                  <MenubarItem disabled>
-                    <FilePenIcon />
-                    Rename
-                  </MenubarItem>
-                  <MenubarItem disabled>
-                    <TrashIcon />
-                    Remove
-                  </MenubarItem>
+                  <RenameDialog documentId={data._id} initialTitle={data.title}>
+                    <MenubarItem
+                      onClick={(e) => e.stopPropagation()}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <FilePenIcon />
+                      Rename
+                    </MenubarItem>
+                  </RenameDialog>
+                  <RemoveDialog documentId={data._id}>
+                    <MenubarItem
+                      onClick={(e) => e.stopPropagation()}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <TrashIcon />
+                      Remove
+                    </MenubarItem>
+                  </RemoveDialog>
                   <MenubarSeparator />
                   <MenubarItem onClick={() => window.print()}>
                     <PrinterIcon />

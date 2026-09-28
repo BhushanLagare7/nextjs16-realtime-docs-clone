@@ -69,16 +69,10 @@ export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
     const user = await ctx.auth.getUserIdentity()
-
-    if (!user) {
-      throw new ConvexError("Unauthorized")
-    }
+    if (!user) throw new ConvexError("Unauthorized")
 
     const document = await ctx.db.get(id)
-
-    if (!document) {
-      return null
-    }
+    if (!document) throw new ConvexError("Document not found")
 
     const isOwner = document.ownerId === user.subject
     const organizationId = (user.organization_id ?? undefined) as

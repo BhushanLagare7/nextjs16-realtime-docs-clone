@@ -3,8 +3,10 @@
 import { useRef, useState } from "react"
 import { FaCaretDown } from "react-icons/fa"
 
+import { useMutation, useStorage } from "@liveblocks/react/suspense"
+
+import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
 import { cn } from "@/lib/utils"
-import { useEditorStore } from "@/store/use-editor-store"
 
 /**
  * Total width of the page/document in pixels.
@@ -22,7 +24,7 @@ export const MINIMUM_SPACE = 100
  * Default margin size (in pixels) applied to both left and right sides
  * on initial render and when a margin marker is double-clicked (reset).
  */
-export const DEFAULT_MARGIN = 56
+export const DEFAULT_MARGIN = LEFT_MARGIN_DEFAULT
 
 /**
  * Array of marker indices used to render ruler tick marks.
@@ -35,13 +37,13 @@ const markers = Array.from({ length: 83 }, (_, i) => i)
  * Props for the `Ruler` component.
  */
 interface RulerProps {
-  /** Current left margin offset in pixels. Defaults to value from useEditorStore. */
+  /** Optional controlled left margin offset in pixels. Defaults to Liveblocks storage value. */
   leftMargin?: number
-  /** Current right margin offset in pixels. Defaults to value from useEditorStore. */
+  /** Optional controlled right margin offset in pixels. Defaults to Liveblocks storage value. */
   rightMargin?: number
-  /** Sets/updates the left margin offset. */
+  /** Sets/updates the left margin offset. Defaults to Liveblocks mutation. */
   setLeftMargin?: (value: number) => void
-  /** Sets/updates the right margin offset. */
+  /** Sets/updates the right margin offset. Defaults to Liveblocks mutation. */
   setRightMargin?: (value: number) => void
 }
 
@@ -152,12 +154,22 @@ export function Ruler({
   setLeftMargin: controlledSetLeftMargin,
   setRightMargin: controlledSetRightMargin,
 }: RulerProps = {}) {
-  const store = useEditorStore()
+  const storageLeftMargin = useStorage((root) => root.leftMargin)
+  const setStorageLeftMargin = useMutation(({ storage }, position: number) => {
+    storage.set("leftMargin", position)
+  }, [])
 
-  const leftMargin = controlledLeftMargin ?? store.leftMargin
-  const setLeftMargin = controlledSetLeftMargin ?? store.setLeftMargin
-  const rightMargin = controlledRightMargin ?? store.rightMargin
-  const setRightMargin = controlledSetRightMargin ?? store.setRightMargin
+  const storageRightMargin = useStorage((root) => root.rightMargin)
+  const setStorageRightMargin = useMutation(({ storage }, position: number) => {
+    storage.set("rightMargin", position)
+  }, [])
+
+  const leftMargin =
+    controlledLeftMargin ?? storageLeftMargin ?? LEFT_MARGIN_DEFAULT
+  const setLeftMargin = controlledSetLeftMargin ?? setStorageLeftMargin
+  const rightMargin =
+    controlledRightMargin ?? storageRightMargin ?? RIGHT_MARGIN_DEFAULT
+  const setRightMargin = controlledSetRightMargin ?? setStorageRightMargin
 
   /** Whether the left margin marker is currently being dragged. */
   const [isDraggingLeft, setIsDraggingLeft] = useState(false)
@@ -246,7 +258,7 @@ export function Ruler({
    * Triggered by double-clicking the left margin marker.
    */
   const handleLeftDoubleClick = () => {
-    setLeftMargin(DEFAULT_MARGIN)
+    setLeftMargin(LEFT_MARGIN_DEFAULT)
   }
 
   /**
@@ -254,7 +266,7 @@ export function Ruler({
    * Triggered by double-clicking the right margin marker.
    */
   const handleRightDoubleClick = () => {
-    setRightMargin(DEFAULT_MARGIN)
+    setRightMargin(RIGHT_MARGIN_DEFAULT)
   }
 
   return (

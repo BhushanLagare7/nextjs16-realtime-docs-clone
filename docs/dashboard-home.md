@@ -67,6 +67,7 @@ The dashboard page uses Next.js Route Groups `(home)` to isolate home page layou
   export interface Template {
     id: string
     imageUrl: string
+    initialContent?: string
     label: string
   }
   ```

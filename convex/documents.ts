@@ -3,7 +3,7 @@ import { ConvexError, v } from "convex/values"
 
 import { mutation, query } from "./_generated/server"
 
-/** Creates a new document. */
+/** Creates a new document owned by the authenticated user. */
 export const create = mutation({
   args: {
     title: v.optional(v.string()),
@@ -47,6 +47,7 @@ export const get = query({
     const organizationId = (user.organization_id ?? undefined) as
       string | undefined
 
+    // Search within the caller's organization.
     if (search && organizationId) {
       return await ctx.db
         .query("documents")
@@ -56,6 +57,7 @@ export const get = query({
         .paginate(paginationOpts)
     }
 
+    // Search within the caller's personal documents.
     if (search) {
       return await ctx.db
         .query("documents")
@@ -65,6 +67,7 @@ export const get = query({
         .paginate(paginationOpts)
     }
 
+    // List all documents belonging to the caller's organization.
     if (organizationId) {
       return await ctx.db
         .query("documents")
@@ -74,6 +77,7 @@ export const get = query({
         .paginate(paginationOpts)
     }
 
+    // List the caller's personal documents.
     return await ctx.db
       .query("documents")
       .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
@@ -158,7 +162,7 @@ export const getById = query({
     const document = await ctx.db.get(id)
 
     if (!document) {
-      return null
+      throw new ConvexError("Document not found")
     }
 
     const isOwner = document.ownerId === user.subject
@@ -176,7 +180,10 @@ export const getById = query({
   },
 })
 
-/** Returns a list of document IDs and names for batch room resolution. */
+/**
+ * Returns a list of document IDs and names for batch room resolution.
+ * Documents the caller cannot access are returned with a "[Removed]" name.
+ */
 export const getByIds = query({
   args: { ids: v.array(v.id("documents")) },
   handler: async (ctx, { ids }) => {

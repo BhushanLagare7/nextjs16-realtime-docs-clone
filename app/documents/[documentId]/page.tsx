@@ -1,37 +1,36 @@
-import { FullscreenLoader } from "@/components/fullscreen-loader"
+import { auth } from "@clerk/nextjs/server"
+import { preloadQuery } from "convex/nextjs"
 
-import { DocumentEditor } from "./editor"
-import { Navbar } from "./navbar"
-import { ClientSideSuspense, Room } from "./room"
-import { Toolbar } from "./toolbar"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
+
+import { Document } from "./document"
 
 interface DocumentIdPageProps {
   /** Next.js dynamic route params, resolved asynchronously */
-  params: Promise<{ documentId: string }>
+  params: Promise<{ documentId: Id<"documents"> }>
 }
 
 /**
  * Page component for viewing/editing a single document.
- * Renders the top navigation bar, toolbar, and the document editor for the given documentId.
+ * Preloads document data on the server using an authenticated Convex token,
+ * then renders the collaborative Document client interface.
  */
 export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
   const { documentId } = await params
 
-  return (
-    <Room key={documentId} roomId={documentId}>
-      <div className="min-h-screen bg-muted/40 print:bg-white">
-        <div className="fixed top-0 right-0 left-0 z-10 flex flex-col gap-y-2 bg-background px-4 pt-2 print:hidden">
-          <Navbar />
-          <Toolbar />
-        </div>
-        <div className="flex min-h-screen flex-col pt-28.5 print:pt-0">
-          <ClientSideSuspense
-            fallback={<FullscreenLoader label="Room loading…" />}
-          >
-            <DocumentEditor documentId={documentId} />
-          </ClientSideSuspense>
-        </div>
-      </div>
-    </Room>
+  const { getToken } = await auth()
+  const token = (await getToken({ template: "convex" })) ?? undefined
+
+  if (!token) {
+    throw new Error("Unauthorized")
+  }
+
+  const preloadedDocument = await preloadQuery(
+    api.documents.getById,
+    { id: documentId },
+    { token }
   )
+
+  return <Document preloadedDocument={preloadedDocument} />
 }
