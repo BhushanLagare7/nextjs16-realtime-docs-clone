@@ -78,9 +78,8 @@ export function Room({ children, roomId }: RoomProps) {
 
   return (
     <LiveblocksProvider
-      authEndpoint={async () => {
+      authEndpoint={async (room) => {
         const endpoint = "/api/liveblocks-auth"
-        const room = id
 
         const response = await fetch(endpoint, {
           body: JSON.stringify({ room }),
@@ -117,6 +116,9 @@ export function Room({ children, roomId }: RoomProps) {
         return documents.map((document) => ({
           id: document.id,
           name: document.name,
+          ...(document.name !== "[Removed]" && {
+            url: `/documents/${document.id}`,
+          }),
         }))
       }}
       resolveUsers={async ({ userIds }) => {

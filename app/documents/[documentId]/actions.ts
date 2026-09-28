@@ -20,10 +20,13 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
 export async function getDocuments(ids: Id<"documents">[]) {
   const { getToken } = await auth()
   const token = await getToken({ template: "convex" })
-  if (token) {
-    convex.setAuth(token)
+  if (!token) {
+    throw new Error("Unauthorized")
   }
-  return await convex.query(api.documents.getByIds, { ids })
+
+  const client = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!)
+  client.setAuth(token)
+  return await client.query(api.documents.getByIds, { ids })
 }
 
 /**

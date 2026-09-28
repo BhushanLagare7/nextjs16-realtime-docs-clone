@@ -3,9 +3,10 @@
 import {
   ClientSideSuspense,
   useInboxNotifications,
+  useUnreadInboxNotificationsCount,
 } from "@liveblocks/react/suspense"
 import { InboxNotification, InboxNotificationList } from "@liveblocks/react-ui"
-import { BellIcon } from "lucide-react"
+import { BellIcon, LoaderIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -16,7 +17,9 @@ import {
 import { Separator } from "@/components/ui/separator"
 
 function InboxMenu() {
-  const { inboxNotifications } = useInboxNotifications()
+  const { fetchMore, hasFetchedAll, inboxNotifications, isFetchingMore } =
+    useInboxNotifications()
+  const { count } = useUnreadInboxNotificationsCount()
 
   return (
     <>
@@ -29,23 +32,48 @@ function InboxMenu() {
             variant="ghost"
           >
             <BellIcon className="size-5" />
-            {inboxNotifications.length > 0 && (
+            {count > 0 && (
               <span className="absolute -top-1 -right-1 flex size-4 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
-                {inboxNotifications.length}
+                {count}
               </span>
             )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-auto">
           {inboxNotifications.length > 0 ? (
-            <InboxNotificationList>
-              {inboxNotifications.map((inboxNotification) => (
-                <InboxNotification
-                  key={inboxNotification.id}
-                  inboxNotification={inboxNotification}
-                />
-              ))}
-            </InboxNotificationList>
+            <>
+              <InboxNotificationList>
+                {inboxNotifications.map((inboxNotification) => (
+                  <InboxNotification
+                    key={inboxNotification.id}
+                    inboxNotification={inboxNotification}
+                  />
+                ))}
+              </InboxNotificationList>
+              {!hasFetchedAll && (
+                <div className="border-t border-border p-2 text-center">
+                  <Button
+                    className="w-full text-xs"
+                    disabled={isFetchingMore}
+                    size="sm"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      fetchMore()
+                    }}
+                  >
+                    {isFetchingMore ? (
+                      <>
+                        <LoaderIcon className="size-3.5 animate-spin" />
+                        <span>Loading more…</span>
+                      </>
+                    ) : (
+                      "Load more"
+                    )}
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="w-100 p-2 text-center text-sm text-muted-foreground">
               No notifications

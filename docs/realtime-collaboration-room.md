@@ -36,7 +36,7 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 - **User, Room & Mention Resolution**:
   - `resolveUsers({ userIds })`: Asynchronously awaits directory loading before mapping IDs to `{ name, avatar }` to prevent caching `undefined` results.
   - `resolveMentionSuggestions({ text })`: Filters organization members by matching substring in mentions.
-  - `resolveRoomsInfo({ roomIds })`: Batches document IDs via `getDocuments(ids)` server action (`api.documents.getByIds`) to resolve document titles for cross-room notifications.
+  - `resolveRoomsInfo({ roomIds })`: Batches document IDs via `getDocuments(ids)` server action (`api.documents.getByIds`) to resolve document titles and navigable URLs (`/documents/${document.id}`) for cross-room notifications.
   - **Cache Invalidation**: `DirectoryCacheInvalidator` triggers `client.resolvers.invalidateUsers()` and `client.resolvers.invalidateMentionSuggestions()` whenever loaded directory users change.
 
 ---
