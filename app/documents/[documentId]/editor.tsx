@@ -147,6 +147,66 @@ export function DocumentEditor({
     return () => setEditor(null)
   }, [editor, setEditor])
 
+  // Reliably populate initialContent into the document when both the editor instance
+  // and the Liveblocks Yjs provider are ready. With immediatelyRender: false in Next.js,
+  // useLiveblocksExtension's internal effect runs on mount when editor.current is null,
+  // and because its dependency array does not track editor creation, initialContent is dropped
+  // if the Liveblocks room connection was already established before mounting.
+  useEffect(() => {
+    if (!editor || !initialContent) return
+
+    interface LiveblocksExtensionStorage {
+      doc?: {
+        getMap: (name: string) => {
+          get: (key: string) => unknown
+          set: (key: string, value: unknown) => void
+        }
+      }
+      provider?: {
+        getStatus: () => string
+        off: (event: string, cb: (...args: unknown[]) => void) => void
+        on: (event: string, cb: (...args: unknown[]) => void) => void
+      }
+    }
+
+    const storage = (
+      editor.storage as unknown as Record<
+        string,
+        LiveblocksExtensionStorage | undefined
+      >
+    ).liveblocksExtension
+
+    const provider = storage?.provider
+    const ydoc = storage?.doc
+
+    if (!ydoc) return
+
+    const applyInitialContent = () => {
+      const config = ydoc.getMap("liveblocks_config")
+      if (!config.get("hasContentSet") && editor.isEmpty) {
+        config.set("hasContentSet", true)
+        editor.commands.setContent(initialContent)
+      }
+    }
+
+    const status = provider?.getStatus()
+    if (!provider || status === "synchronizing" || status === "synchronized") {
+      applyInitialContent()
+    } else {
+      const handleStatus = () => {
+        const nextStatus = provider.getStatus()
+        if (nextStatus === "synchronizing" || nextStatus === "synchronized") {
+          applyInitialContent()
+          provider.off("status", handleStatus)
+        }
+      }
+      provider.on("status", handleStatus)
+      return () => {
+        provider.off("status", handleStatus)
+      }
+    }
+  }, [editor, initialContent])
+
   return (
     // Scrollable container that centers the "page" and adapts for print
     <div className="size-full flex-1 overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">

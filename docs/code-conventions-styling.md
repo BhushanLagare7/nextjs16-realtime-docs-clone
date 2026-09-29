@@ -51,7 +51,7 @@ This document establishes the styling standards, Tailwind CSS v4 class merging r
 - **Icon Buttons**: All interactive elements lacking visible text (such as toolbar buttons) MUST include an descriptive `aria-label`:
   ```tsx
   <Button aria-label="Toggle Bold" size="icon" variant="ghost">
-    <Bold className="size-4" />
+    <BoldIcon className="size-4" />
   </Button>
   ```
 - **Keyboard Navigation**: Ensure custom dropdowns, popovers, and dialogs remain accessible via Tab, Escape, and Enter keys.

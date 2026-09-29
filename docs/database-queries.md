@@ -57,7 +57,7 @@ export const get = query({
 })
 ```
 
-- **Index Ordering Invariant**: By default, Convex index queries return results in ascending insertion order. Paginated index queries (`by_organization_id`, `by_owner_id`) must explicitly chain `.order("desc")` before `.paginate(paginationOpts)` for reverse-chronological listings (`withSearchIndex` queries cannot use `.order()` because results are ranked by relevance score).
+- **Index Ordering Invariant**: Convex index results are ordered by their indexed fields, with `_creationTime` serving as the final tie-breaker (rather than simple insertion order). In paginated queries on indexes defined over single fields (`by_organization_id` on `["organizationId"]`, `by_owner_id` on `["ownerId"]`), equality query bounds (`q.eq`) lock those fields to a constant value, sorting remaining matches by `_creationTime`; these queries must explicitly chain `.order("desc")` before `.paginate(paginationOpts)` to achieve reverse-chronological listings (`withSearchIndex` queries cannot use `.order()` because results are ranked by relevance score).
 - **Client Consumption**: Client components consume paginated queries via `usePaginatedQuery(api.documents.get, { search }, { initialNumItems: 5 })`.
 
 ---

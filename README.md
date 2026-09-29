@@ -195,7 +195,7 @@ nextjs16-realtime-docs-clone/
 
 Make sure you have installed:
 
-- **Node.js**: `v20.x` or higher
+- **Node.js**: `20.9.0` or newer
 - **npm**, **pnpm**, or **bun**
 - Free accounts with **[Clerk](https://clerk.com/)**, **[Convex](https://www.convex.dev/)**, and **[Liveblocks](https://liveblocks.io/)**
 

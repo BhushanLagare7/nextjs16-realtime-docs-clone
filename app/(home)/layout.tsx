@@ -4,6 +4,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  openGraph: {
+    url: "/",
+  },
 }
 
 interface HomeLayoutProps {
@@ -11,7 +14,7 @@ interface HomeLayoutProps {
 }
 
 /**
- * Layout wrapper for the home route group, applying the canonical URL for the root page.
+ * Layout wrapper for the home route group, applying canonical and Open Graph URLs for the root page.
  */
 export default function HomeLayout({ children }: HomeLayoutProps) {
   return children
