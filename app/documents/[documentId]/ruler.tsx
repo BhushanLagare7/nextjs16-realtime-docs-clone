@@ -1,37 +1,22 @@
 "use client"
 
 import { useRef, useState } from "react"
-import { FaCaretDown } from "react-icons/fa"
 
 import { useMutation, useStorage } from "@liveblocks/react/suspense"
 
-import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
-import { cn } from "@/lib/utils"
+import {
+  DEFAULT_MARGIN,
+  LEFT_MARGIN_DEFAULT,
+  markers,
+  MINIMUM_SPACE,
+  PAGE_WIDTH,
+  RIGHT_MARGIN_DEFAULT,
+} from "@/constants/margins"
 
-/**
- * Total width of the page/document in pixels.
- * This represents the standard width used for margin calculations (e.g., 8.5" at 96 DPI).
- */
-export const PAGE_WIDTH = 816
+import { Marker } from "./ruler/marker"
 
-/**
- * Minimum space (in pixels) that must remain between the left and right margins.
- * Prevents the margins from overlapping or crossing each other.
- */
-export const MINIMUM_SPACE = 100
-
-/**
- * Default margin size (in pixels) applied to both left and right sides
- * on initial render and when a margin marker is double-clicked (reset).
- */
-export const DEFAULT_MARGIN = LEFT_MARGIN_DEFAULT
-
-/**
- * Array of marker indices used to render ruler tick marks.
- * 83 markers are generated to create fine-grained (minor) and
- * coarse-grained (major, every 10th) tick marks across the ruler.
- */
-const markers = Array.from({ length: 83 }, (_, i) => i)
+// Re-export constants for backward compatibility
+export { DEFAULT_MARGIN, MINIMUM_SPACE, PAGE_WIDTH }
 
 /**
  * Props for the `Ruler` component.
@@ -45,92 +30,6 @@ interface RulerProps {
   setLeftMargin?: (value: number) => void
   /** Sets/updates the right margin offset. Defaults to Liveblocks mutation. */
   setRightMargin?: (value: number) => void
-}
-
-/**
- * Props for the `Marker` component, representing a draggable margin indicator.
- */
-interface MarkerProps {
-  /** Whether the marker is currently being dragged by the user. */
-  isDragging: boolean
-  /** Whether this marker represents the left margin (true) or right margin (false). */
-  isLeft: boolean
-  /** Current pixel offset of the marker from the edge of the ruler. */
-  position: number
-  /** Callback fired when the user double-clicks the marker (resets to default position). */
-  onDoubleClick: () => void
-  /** Callback fired when pointer is canceled (ends drag and releases capture). */
-  onPointerCancel: (e: React.PointerEvent<HTMLDivElement>) => void
-  /** Callback fired when pointer goes down on marker (starts drag and captures pointer). */
-  onPointerDown: (e: React.PointerEvent<HTMLDivElement>) => void
-  /** Callback fired when pointer moves while dragging. */
-  onPointerMove: (e: React.PointerEvent<HTMLDivElement>) => void
-  /** Callback fired when pointer is released (ends drag and releases capture). */
-  onPointerUp: (e: React.PointerEvent<HTMLDivElement>) => void
-}
-
-/**
- * Renders a single draggable margin marker on the ruler.
- *
- * Displays a caret icon indicating the margin boundary, and (while dragging)
- * a vertical guide line extending down the page to help visually align content.
- *
- * @param props - See {@link MarkerProps}.
- */
-function Marker({
-  isDragging,
-  isLeft,
-  position,
-  onDoubleClick,
-  onPointerCancel,
-  onPointerDown,
-  onPointerMove,
-  onPointerUp,
-}: MarkerProps) {
-  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId)
-    onPointerDown(e)
-  }
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId)
-    }
-    onPointerUp(e)
-  }
-
-  const handlePointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId)
-    }
-    onPointerCancel(e)
-  }
-
-  return (
-    <div
-      className={cn(
-        "group absolute top-0 z-5 h-full w-4 cursor-ew-resize",
-        isLeft ? "-ml-2" : "-mr-2"
-      )}
-      style={{ [isLeft ? "left" : "right"]: `${position}px` }}
-      onDoubleClick={onDoubleClick}
-      onPointerCancel={handlePointerCancel}
-      onPointerDown={handlePointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={handlePointerUp}
-    >
-      {/* Caret icon indicating the draggable margin handle */}
-      <FaCaretDown className="absolute top-0 left-1/2 h-full -translate-x-1/2 fill-primary hover:fill-primary/80" />
-
-      {/* Vertical guide line shown only while actively dragging this marker */}
-      <div
-        className={cn(
-          "absolute top-4 left-1/2 h-screen w-px -translate-x-1/2 scale-x-50 bg-primary",
-          isDragging ? "block" : "hidden"
-        )}
-      />
-    </div>
-  )
 }
 
 /**

@@ -17,21 +17,27 @@ nextjs16-realtime-docs-clone/
 │   │   └── liveblocks-auth/# Liveblocks authentication endpoint
 │   ├── documents/
 │   │   └── [documentId]/   # Document editor workspace, navbar, toolbar, ruler, room, avatars, actions
+│   │       ├── navbar/     # Modular menubar subcomponents (file, edit, insert, format)
+│   │       ├── ruler/      # Ruler marker component with pointer capture
+│   │       ├── toolbar/    # Modular toolbar buttons and dropdown controls
+│   │       └── editor-extensions.ts # Tiptap editor extension configurations
 │   ├── globals.css         # Global styles and Tailwind v4 theme definitions
 │   └── layout.tsx          # Root layout with font and theme providers
 ├── components/             # Reusable UI components
-│   ├── toolbar/            # Document editor toolbar controls
 │   ├── ui/                 # shadcn/ui primitive components
+│   ├── color-picker.tsx    # Google Docs-style color picker popover
+│   ├── color-spectrum-picker.tsx # Custom spectrum picker with react-colorful
 │   ├── convex-client-provider.tsx # Convex client provider
 │   ├── remove-dialog.tsx   # Shared document deletion confirmation dialog
 │   ├── rename-dialog.tsx   # Shared document rename dialog
 │   └── theme-provider.tsx  # Next-themes provider
-├── constants/              # Application-wide static constants (fonts, margins)
+├── constants/              # Application-wide static constants (color palette, margins, templates)
 ├── convex/                 # Convex backend schema, queries, mutations
+│   └── lib/                # Shared backend helpers (auth & ownership guards)
 ├── docs/                   # Modular convention documentation
 ├── extensions/             # Custom Tiptap editor extensions
-├── hooks/                  # Reusable custom hooks (e.g., debounce, mobile check)
-├── lib/                    # Shared utility functions (`cn()`)
+├── hooks/                  # Reusable custom hooks (e.g., debounce, search params)
+├── lib/                    # Shared utility functions (`cn()`, `document-export.ts`)
 ├── public/                 # Static assets (favicons, SVG logos)
 ├── store/                  # Zustand stores (`use-editor-store.ts`)
 └── types/                  # Shared TypeScript types and interfaces

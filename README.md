@@ -73,7 +73,7 @@ Experience the pixel-perfect dual-surface experience crafted with semantic OKLCH
 
 ### 🖨️ Multi-Format Document Export
 
-- **One-Click Exports**: Export documents instantly to **PDF** (via browser print formatting), **HTML**, **JSON** (Tiptap ProseMirror node tree), and **Plain Text**.
+- **One-Click Exports**: Export documents instantly to **PDF** (via browser print formatting), **HTML**, **JSON** (Tiptap ProseMirror node tree), and **Plain Text** using dedicated client-side export utilities in `lib/document-export.ts`.
 
 ---
 
@@ -161,24 +161,40 @@ nextjs16-realtime-docs-clone/
 │   │   ├── document.tsx              # Client document container with Liveblocks Room
 │   │   ├── document-input.tsx        # Inline editable document title
 │   │   ├── editor.tsx                # Tiptap canvas (816px) & editor mount
-│   │   ├── navbar.tsx                # Document menubar, file operations, export actions
-│   │   ├── ruler.tsx                 # Interactive 816px canvas ruler & margin markers
-│   │   ├── toolbar.tsx               # Rich text formatting buttons & dropdown controls
+│   │   ├── editor-extensions.ts      # Configured Tiptap extension suite
+│   │   ├── navbar.tsx                # Top navigation shell & presence controls
+│   │   ├── navbar/                   # Modular menubar sections (file, edit, insert, format)
+│   │   ├── ruler.tsx                 # Interactive 816px canvas ruler
+│   │   ├── ruler/                    # Margin marker with pointer capture & guideline
+│   │   ├── toolbar.tsx               # Editor toolbar entry point & button groups
+│   │   ├── toolbar/                  # Modular formatting controls & dropdown buttons
 │   │   ├── room.tsx                  # Liveblocks RoomProvider & boundary setup
 │   │   └── avatars.tsx               # Active collaborator avatar stack
 │   ├── layout.tsx                    # Root layout with NuqsAdapter, Convex, and Clerk
 │   └── globals.css                   # Tailwind v4 theme definitions (OKLCH color space)
 ├── components/                       # Shared shadcn/ui & feature components
+│   ├── color-picker.tsx              # Google Docs-style color picker popover
+│   ├── color-spectrum-picker.tsx     # Custom color spectrum picker (react-colorful)
 │   ├── convex-client-provider.tsx    # Convex + Clerk auth binding provider
-│   ├── mode-toggle.tsx               # Tri-theme light/dark toggle button
+│   ├── remove-dialog.tsx             # Shared document deletion dialog
+│   ├── rename-dialog.tsx             # Shared document rename dialog
+│   ├── theme-provider.tsx            # Next-themes provider
 │   └── ui/                           # Reusable primitive UI components
+├── constants/                        # Application-wide static constants
+│   ├── color-palette.ts              # Standard Google Docs 80-color palette
+│   ├── margins.ts                    # Page dimensions, default margins, ruler markers
+│   └── templates.ts                  # Document starter templates metadata
 ├── convex/                           # Convex backend functions & configuration
 │   ├── schema.ts                     # Database schema definitions & indexing
 │   ├── documents.ts                  # Document queries (get, getById) & mutations
+│   ├── lib/auth.ts                   # Reusable auth & dual-ownership guards
 │   └── auth.config.ts                # Clerk JWT validation config
 ├── extensions/                       # Custom Tiptap extensions
 │   ├── font-size.ts                  # Custom inline font size mark extension
 │   └── line-height.ts                # Custom block line height node extension
+├── lib/                              # Shared utility functions
+│   ├── document-export.ts            # Client-side multi-format export utilities
+│   └── utils.ts                      # Tailwind cn() className merger
 ├── docs/                             # In-depth architectural & domain documentation
 ├── public/                           # Static assets, branding, and screenshots
 │   └── screenshots/                  # High-res light & dark preview screenshots
@@ -278,6 +294,8 @@ npm run build
 ## 💡 Engineering Decisions & Invariants
 
 - **Async Route Params in Next.js 16**: Dynamic route parameters (`params` and `searchParams`) in Next.js 16 are Promises. Every page and server action strictly `await`s them before consumption.
+- **Modular Component Architecture**: High-complexity surfaces (`navbar`, `toolbar`, `ruler`, `editor`, `color-picker`) are broken down into focused subcomponents with single responsibilities (`navbar/`, `toolbar/`, `ruler/`, `editor-extensions.ts`), preventing monoliths and reducing re-render scope.
+- **Centralized Dual-Ownership Authorization**: Document queries and mutations enforce multi-tenancy invariants (`ownerId === user.subject || organizationId === user.orgId`) through unified backend guards in `convex/lib/auth.ts`.
 - **Tiptap Block vs. Inline Separation**: Block-level properties (e.g. `lineHeight`, `textAlign`) are applied exclusively to parent nodes via `setNodeMarkup`, preventing invalid ProseMirror inline span corruption.
 - **Dual-Surface Zero-Contrast Theming**: Rather than relying on hardcoded hex codes or ad-hoc Tailwind colors, all surfaces use semantic CSS variables mapped to OKLCH tokens, preserving readability across monitors.
 - **Optimistic Convex Mutation Pipelines**: Database updates trigger reactive query updates across all subscribed tabs instantly without requiring manual state re-fetching.
