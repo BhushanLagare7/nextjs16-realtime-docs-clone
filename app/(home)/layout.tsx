@@ -5,6 +5,11 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
+    title: "Scribe",
+    description: "Real-time collaborative documentation platform",
+    siteName: "Scribe",
+    type: "website",
+    locale: "en_US",
     url: "/",
   },
 }
