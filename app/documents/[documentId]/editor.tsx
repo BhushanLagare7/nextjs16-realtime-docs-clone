@@ -1,5 +1,8 @@
 "use client"
 
+import { useEffect } from "react"
+
+import { useStorage } from "@liveblocks/react/suspense"
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap"
 import { Color } from "@tiptap/extension-color"
 import { FontFamily } from "@tiptap/extension-font-family"
@@ -19,6 +22,7 @@ import { TextStyle } from "@tiptap/extension-text-style"
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 
+import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
 import { FontSizeExtension } from "@/extensions/font-size"
 import { LineHeightExtension } from "@/extensions/line-height"
 import { useEditorStore } from "@/store/use-editor-store"
@@ -29,6 +33,8 @@ import { Threads } from "./threads"
 interface DocumentEditorProps {
   /** ID of the document being edited (currently unused, reserved for future persistence logic) */
   documentId?: string
+  /** Initial content loaded when the document is first created */
+  initialContent?: string
 }
 
 /**
@@ -38,48 +44,54 @@ interface DocumentEditorProps {
  *
  * Using useEditor hook API with EditorContent for single-component editor lifecycle.
  */
-export function DocumentEditor({ documentId }: DocumentEditorProps) {
+export function DocumentEditor({
+  documentId,
+  initialContent,
+}: DocumentEditorProps) {
   void documentId // reserved for future use (e.g. loading/saving document content)
 
-  const liveblocks = useLiveblocksExtension()
-  const { leftMargin, rightMargin, setEditor, setLeftMargin, setRightMargin } =
-    useEditorStore()
+  const leftMargin =
+    useStorage((root) => root.leftMargin) ?? LEFT_MARGIN_DEFAULT
+  const rightMargin =
+    useStorage((root) => root.rightMargin) ?? RIGHT_MARGIN_DEFAULT
+
+  const liveblocks = useLiveblocksExtension({
+    initialContent,
+    offlineSupport_experimental: true,
+  })
+  const { setEditor } = useEditorStore()
 
   const editor = useEditor({
     immediatelyRender: false,
     enableContentCheck: true,
-    // Keep the global store in sync with the editor instance across its lifecycle
-    onCreate({ editor }) {
-      setEditor(editor)
-    },
     onDestroy() {
       setEditor(null)
     },
-    onUpdate({ editor }) {
-      setEditor(editor)
+    onUpdate({ editor: ed }) {
+      setEditor(ed)
     },
-    onSelectionUpdate({ editor }) {
-      setEditor(editor)
+    onSelectionUpdate({ editor: ed }) {
+      setEditor(ed)
     },
-    onTransaction({ editor }) {
-      setEditor(editor)
+    onTransaction({ editor: ed }) {
+      setEditor(ed)
     },
-    onFocus({ editor }) {
-      setEditor(editor)
+    onFocus({ editor: ed }) {
+      setEditor(ed)
     },
-    onBlur({ editor }) {
-      setEditor(editor)
+    onBlur({ editor: ed }) {
+      setEditor(ed)
     },
-    onContentError({ editor, error, disableCollaboration }) {
+    onContentError({ editor: ed, error, disableCollaboration }) {
       disableCollaboration?.()
-      editor.setEditable(false, false)
+      ed.setEditable(false, false)
       console.error("Content validation error:", error)
-      setEditor(editor)
+      setEditor(ed)
     },
     editorProps: {
       attributes: {
         // Emulates a page-like editing surface (fixed width/height, print-friendly styles)
-        style: `--page-margin-left: ${leftMargin ?? 56}px; --page-margin-right: ${rightMargin ?? 56}px;`,
+        style: `--page-margin-left: ${leftMargin}px; --page-margin-right: ${rightMargin}px;`,
         class:
           "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 pl-[var(--page-margin-left,56px)] pr-[var(--page-margin-right,56px)] cursor-text print:bg-white print:text-black print:border-none print:p-0 print:shadow-none",
       },
@@ -127,15 +139,17 @@ export function DocumentEditor({ documentId }: DocumentEditorProps) {
     ],
   })
 
+  // Sync the editor instance to the global store via useEffect so the
+  // Zustand store update never fires during React's render phase.
+  useEffect(() => {
+    setEditor(editor ?? null)
+    return () => setEditor(null)
+  }, [editor, setEditor])
+
   return (
     // Scrollable container that centers the "page" and adapts for print
     <div className="size-full flex-1 overflow-x-auto bg-muted/40 px-4 print:overflow-visible print:bg-white print:p-0">
-      <Ruler
-        leftMargin={leftMargin}
-        rightMargin={rightMargin}
-        setLeftMargin={setLeftMargin}
-        setRightMargin={setRightMargin}
-      />
+      <Ruler />
       <div className="relative mx-auto flex w-204 min-w-max justify-center py-4 print:w-full print:min-w-0 print:py-0">
         <EditorContent editor={editor} />
         <Threads editor={editor} />

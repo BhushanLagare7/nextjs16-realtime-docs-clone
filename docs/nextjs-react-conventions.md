@@ -12,23 +12,36 @@ In Next.js 16, dynamic route `params` and `searchParams` passed to pages, layout
 
 ```tsx
 // app/documents/[documentId]/page.tsx
-interface DocumentPageProps {
-  params: Promise<{ documentId: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+interface DocumentIdPageProps {
+  params: Promise<{ documentId: Id<"documents"> }>
 }
 
-export default async function DocumentPage({
-  params,
-  searchParams,
-}: DocumentPageProps) {
+export default async function DocumentIdPage({ params }: DocumentIdPageProps) {
   const { documentId } = await params
-  const resolvedSearchParams = await searchParams
+  const { getToken } = await auth()
+  const token = (await getToken({ template: "convex" })) ?? undefined
 
-  return (
-    <main>
-      <DocumentEditor documentId={documentId} />
-    </main>
-  )
+  if (!token) throw new Error("Unauthorized")
+
+  let preloadedDocument
+  try {
+    preloadedDocument = await preloadQuery(
+      api.documents.getById,
+      { id: documentId },
+      { token }
+    )
+  } catch (error) {
+    if (
+      error instanceof ConvexError &&
+      (error.data === "Document not found" ||
+        error.message === "Document not found")
+    ) {
+      notFound()
+    }
+    throw error
+  }
+
+  return <Document preloadedDocument={preloadedDocument} />
 }
 ```
 

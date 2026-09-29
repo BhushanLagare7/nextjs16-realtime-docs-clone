@@ -69,16 +69,10 @@ export const getById = query({
   args: { id: v.id("documents") },
   handler: async (ctx, { id }) => {
     const user = await ctx.auth.getUserIdentity()
-
-    if (!user) {
-      throw new ConvexError("Unauthorized")
-    }
+    if (!user) throw new ConvexError("Unauthorized")
 
     const document = await ctx.db.get(id)
-
-    if (!document) {
-      return null
-    }
+    if (!document) throw new ConvexError("Document not found")
 
     const isOwner = document.ownerId === user.subject
     const organizationId = (user.organization_id ?? undefined) as
@@ -97,7 +91,7 @@ export const getById = query({
 ```
 
 - **Enforced Access Contract**: Requires an authenticated identity (`ctx.auth.getUserIdentity()`). Returns the document only when the caller owns it (`ownerId === user.subject`) or has access through the document's organization (`document.organizationId === user.organization_id`). Throws `ConvexError("Unauthorized")` otherwise.
-- **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`, `app/documents/[documentId]/actions.ts`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`) before executing `getById`.
+- **Server-Side Integration**: Callers using `ConvexHttpClient` (e.g. `/api/liveblocks-auth`, `app/documents/[documentId]/actions.ts`) must supply a Convex-compatible Clerk token (`convex.setAuth(token)`). When preloaded via `preloadQuery` in Next.js Server Components, catch `ConvexError` with `"Document not found"` and call `notFound()`, allowing all other errors to bubble.
 
 ---
 

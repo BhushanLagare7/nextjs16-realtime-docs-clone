@@ -69,7 +69,12 @@ export function TemplatesGallery() {
                       backgroundImage: `url(${template.imageUrl})`,
                     }}
                     type="button"
-                    onClick={() => onTemplateClick(template.label, "")}
+                    onClick={() =>
+                      onTemplateClick(
+                        template.label,
+                        template.initialContent ?? ""
+                      )
+                    }
                   />
                   <p className="truncate text-sm font-medium text-foreground">
                     {template.label}

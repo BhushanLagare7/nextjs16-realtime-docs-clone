@@ -32,6 +32,7 @@ Multiplayer synchronization is powered by Liveblocks, wrapping the entire docume
 
 - **Root Page Wrapper**: `DocumentIdPage` wraps the entire page hierarchy in `<Room key={documentId} roomId={documentId}>` so Navbar and Editor share room context. Re-exported by `app/room.tsx` for backwards compatibility.
 - **Scoped Suspense Boundary**: `ClientSideSuspense` wraps only descendants that require Liveblocks data (`DocumentEditor`), rendering `Navbar` and `Toolbar` outside the loading boundary so they remain visible while the editor loads.
+- **Initial Room Storage**: Configures `RoomProvider` with `initialStorage={{ leftMargin: LEFT_MARGIN_DEFAULT, rightMargin: RIGHT_MARGIN_DEFAULT }}` typed via `Liveblocks["Storage"]` in `liveblocks.config.ts`, ensuring collaborative page margins synchronize immediately upon connection.
 - **User Directory Fetching**: Calls the `getUsers(documentId)` Server Action (`actions.ts`), checking document access via Convex `api.documents.getById` and paginating all members of the target organization.
 - **User, Room & Mention Resolution**:
   - `resolveUsers({ userIds })`: Asynchronously awaits directory loading before mapping IDs to `{ name, avatar }` to prevent caching `undefined` results.

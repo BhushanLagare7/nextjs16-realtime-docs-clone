@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { useMutation } from "convex/react"
 import { toast } from "sonner"
@@ -26,6 +27,7 @@ interface RemoveDialogProps {
 
 /** Confirmation dialog to permanently delete a document. */
 export function RemoveDialog({ documentId, children }: RemoveDialogProps) {
+  const router = useRouter()
   const remove = useMutation(api.documents.removeById)
   const [isRemoving, setIsRemoving] = useState(false)
 
@@ -52,6 +54,7 @@ export function RemoveDialog({ documentId, children }: RemoveDialogProps) {
               remove({ id: documentId })
                 .then(() => {
                   toast.success("Document removed")
+                  router.push("/")
                 })
                 .catch(() => {
                   toast.error("Something went wrong")

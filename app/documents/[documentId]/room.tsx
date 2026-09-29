@@ -16,17 +16,23 @@ import {
 } from "@liveblocks/react/suspense"
 import { toast } from "sonner"
 
+import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
 import type { Id } from "@/convex/_generated/dataModel"
 
 import { getDocuments, getUsers, type User } from "./actions"
 
 export { ClientSideSuspense }
 
+/** Props for the Room component. */
 interface RoomProps {
   children: ReactNode
   roomId?: string
 }
 
+/**
+ * Invalidates Liveblocks' cached user and mention-suggestion resolvers
+ * whenever the list of organization users changes.
+ */
 function DirectoryCacheInvalidator({ users }: { users: User[] }) {
   const client = useClient()
 
@@ -51,6 +57,7 @@ export function Room({ children, roomId }: RoomProps) {
   const [users, setUsers] = useState<User[]>([])
   const usersPromiseRef = useRef<Promise<User[]> | null>(null)
 
+  /** Fetches (and caches) the list of users associated with the given document. */
   const fetchUsers = useCallback((docId: string) => {
     if (!usersPromiseRef.current) {
       usersPromiseRef.current = getUsers(docId)
@@ -92,6 +99,7 @@ export function Room({ children, roomId }: RoomProps) {
         return await response.json()
       }}
       resolveMentionSuggestions={async ({ text }) => {
+        // Ensure users are loaded before filtering mention suggestions.
         let currentUsers = users
         if (currentUsers.length === 0 && id) {
           try {
@@ -112,6 +120,7 @@ export function Room({ children, roomId }: RoomProps) {
         return filteredUsers.map((user) => user.id)
       }}
       resolveRoomsInfo={async ({ roomIds }) => {
+        // Resolves room metadata (name/url) for the given document IDs.
         const documents = await getDocuments(roomIds as Id<"documents">[])
         return documents.map((document) => ({
           id: document.id,
@@ -122,6 +131,7 @@ export function Room({ children, roomId }: RoomProps) {
         }))
       }}
       resolveUsers={async ({ userIds }) => {
+        // Ensure users are loaded before resolving user info.
         let currentUsers = users
         if (currentUsers.length === 0 && id) {
           try {
@@ -143,7 +153,14 @@ export function Room({ children, roomId }: RoomProps) {
       throttle={16}
     >
       <DirectoryCacheInvalidator users={users} />
-      <RoomProvider id={id} initialPresence={{ cursor: null }}>
+      <RoomProvider
+        id={id}
+        initialPresence={{ cursor: null }}
+        initialStorage={{
+          leftMargin: LEFT_MARGIN_DEFAULT,
+          rightMargin: RIGHT_MARGIN_DEFAULT,
+        }}
+      >
         {children}
       </RoomProvider>
     </LiveblocksProvider>

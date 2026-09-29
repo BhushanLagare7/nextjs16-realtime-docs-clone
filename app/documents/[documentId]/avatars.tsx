@@ -2,7 +2,7 @@
 
 import {
   ClientSideSuspense,
-  useOthers,
+  useOthersMapped,
   useSelf,
 } from "@liveblocks/react/suspense"
 
@@ -10,11 +10,13 @@ import { Separator } from "@/components/ui/separator"
 
 const AVATAR_SIZE = 36
 
+/** Props for a single user avatar. */
 interface AvatarProps {
   name: string
   src: string
 }
 
+/** Renders a circular avatar image with a hover tooltip showing the user's name. */
 function Avatar({ name, src }: AvatarProps) {
   return (
     <div
@@ -34,9 +36,13 @@ function Avatar({ name, src }: AvatarProps) {
   )
 }
 
+/**
+ * Displays a stack of avatars for the current user and other collaborators
+ * currently present in the Liveblocks room.
+ */
 function AvatarStack() {
-  const users = useOthers()
-  const currentUser = useSelf()
+  const users = useOthersMapped((other) => other.info)
+  const currentUser = useSelf((me) => me.info)
 
   const hasCollaborators = users.length > 0
 
@@ -47,11 +53,11 @@ function AvatarStack() {
       <div className="flex items-center">
         {currentUser && (
           <div className="relative ml-2">
-            <Avatar name="You" src={currentUser.info.avatar} />
+            <Avatar name="You" src={currentUser.avatar} />
           </div>
         )}
         <div className="flex">
-          {users.map(({ connectionId, info }) => {
+          {users.map(([connectionId, info]) => {
             return (
               <Avatar key={connectionId} name={info.name} src={info.avatar} />
             )
@@ -63,6 +69,7 @@ function AvatarStack() {
   )
 }
 
+/** Suspense-wrapped entry point for rendering the collaborator avatar stack. */
 export function Avatars() {
   return (
     <ClientSideSuspense fallback={null}>

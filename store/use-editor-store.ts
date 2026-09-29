@@ -1,6 +1,8 @@
 import { type Editor } from "@tiptap/react"
 import { create } from "zustand"
 
+import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
+
 interface EditorState {
   /** The currently active Tiptap editor instance, or null if none is mounted */
   editor: Editor | null
@@ -23,8 +25,8 @@ interface EditorState {
 export const useEditorStore = create<EditorState>((set) => ({
   editor: null,
   setEditor: (editor) => set({ editor }),
-  leftMargin: 56,
+  leftMargin: LEFT_MARGIN_DEFAULT,
   setLeftMargin: (leftMargin) => set({ leftMargin }),
-  rightMargin: 56,
+  rightMargin: RIGHT_MARGIN_DEFAULT,
   setRightMargin: (rightMargin) => set({ rightMargin }),
 }))
