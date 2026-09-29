@@ -18,8 +18,7 @@ export const get = query({
     const user = await ctx.auth.getUserIdentity()
     if (!user) throw new ConvexError("Unauthorized")
 
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined
+    const organizationId = user.organization_id ?? undefined
 
     if (search && organizationId) {
       return await ctx.db
@@ -45,18 +44,21 @@ export const get = query({
         .withIndex("by_organization_id", (q) =>
           q.eq("organizationId", organizationId)
         )
+        .order("desc")
         .paginate(paginationOpts)
     }
 
     return await ctx.db
       .query("documents")
       .withIndex("by_owner_id", (q) => q.eq("ownerId", user.subject))
+      .order("desc")
       .paginate(paginationOpts)
   },
 })
 ```
 
-Client components consume paginated queries via `usePaginatedQuery(api.documents.get, { search }, { initialNumItems: 5 })`.
+- **Index Ordering Invariant**: By default, Convex index queries return results in ascending insertion order. Paginated index queries (`by_organization_id`, `by_owner_id`) must explicitly chain `.order("desc")` before `.paginate(paginationOpts)` for reverse-chronological listings (`withSearchIndex` queries cannot use `.order()` because results are ranked by relevance score).
+- **Client Consumption**: Client components consume paginated queries via `usePaginatedQuery(api.documents.get, { search }, { initialNumItems: 5 })`.
 
 ---
 
@@ -75,11 +77,9 @@ export const getById = query({
     if (!document) throw new ConvexError("Document not found")
 
     const isOwner = document.ownerId === user.subject
-    const organizationId = (user.organization_id ?? undefined) as
-      string | undefined
-    const isOrganizationMember = !!(
-      document.organizationId && document.organizationId === organizationId
-    )
+    const organizationId = user.organization_id ?? undefined
+    const isOrganizationMember =
+      !!document.organizationId && document.organizationId === organizationId
 
     if (!isOwner && !isOrganizationMember) {
       throw new ConvexError("Unauthorized")

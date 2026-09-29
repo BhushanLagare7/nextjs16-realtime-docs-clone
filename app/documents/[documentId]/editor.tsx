@@ -62,6 +62,7 @@ export function DocumentEditor({
   const { setEditor } = useEditorStore()
 
   const editor = useEditor({
+    autofocus: true,
     immediatelyRender: false,
     enableContentCheck: true,
     onDestroy() {
