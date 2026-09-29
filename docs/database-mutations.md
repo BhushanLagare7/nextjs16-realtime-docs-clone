@@ -79,12 +79,11 @@ Queries and search operations must filter strictly by active context to prevent 
 
 ---
 
-## 4. Authorization Guard Pattern
+## 4. Authorization Guard Pattern (`convex/lib/auth.ts`)
 
-All document-scoped mutations (`removeById`, `updateById`, and future mutations) must apply the **dual ownership check**:
+All document-scoped mutations and queries apply standardized, reusable guards from `convex/lib/auth.ts`:
 
-1. **Authenticate**: `ctx.auth.getUserIdentity()` → throw `ConvexError("Unauthorized")` if absent.
-2. **Resolve document**: `ctx.db.get(args.id)` → throw `ConvexError("Document not found")` if absent.
-3. **Authorize**: Allow if caller is the `ownerId` **or** shares the document's `organizationId`. Throw `ConvexError("Unauthorized")` otherwise.
+1. **Authenticate (`requireAuth`)**: `ctx.auth.getUserIdentity()` → throws `ConvexError("Unauthorized")` if absent, returning `{ user, userId, organizationId }`.
+2. **Resolve & Authorize (`requireDocumentAccess`)**: Retrieves document by ID (`ctx.db.get(id)`), throws `ConvexError("Document not found")` if absent, and validates dual ownership via `hasDocumentAccess`: allows if caller is `ownerId` **or** shares the document's `organizationId`. Throws `ConvexError("Unauthorized")` otherwise.
 
 Prefer `ConvexError` (from `convex/values`) over plain `Error` for all user-facing backend errors — it enables structured error payloads and typed client-side error handling via `.catch()`.

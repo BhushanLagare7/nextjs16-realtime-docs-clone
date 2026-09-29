@@ -6,11 +6,11 @@ This document details the navigation bar, title editing, menubar actions, and fi
 
 ## 1. Document Navbar & Menubar Actions (`navbar.tsx`)
 
-The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above the toolbar and coordinates document title editing (`DocumentInput`) and application-level operations via the accessible Radix UI Menubar (`components/ui/menubar.tsx`):
+The document navigation bar (`app/documents/[documentId]/navbar.tsx`) sits above the toolbar and coordinates document title editing (`DocumentInput`) and application-level operations via modular menubar subcomponents (`FileMenu`, `EditMenu`, `InsertMenu`, `FormatMenu` in `app/documents/[documentId]/navbar/`):
 
 1. **Global Editor Instance Access**:
    - Reads `editor` from `useEditorStore` to execute top-level document mutations, serialization, and history operations.
-2. **Document Export Operations (`onDownload`)**:
+2. **Document Export Operations (`lib/document-export.ts`)**:
    - Employs a standardized client-side download helper creating temporary object URLs (`URL.createObjectURL(blob)`), programmatically dispatching an anchor click, and revoking the URL immediately via `URL.revokeObjectURL(url)` to release blob memory:
      - **JSON**: Serializes document nodes via `editor.getJSON()` into `new Blob([JSON.stringify(content)], { type: "application/json" })`.
      - **HTML**: Serializes formatted markup via `editor.getHTML()` into `new Blob([content], { type: "text/html" })`.

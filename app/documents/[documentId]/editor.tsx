@@ -4,29 +4,12 @@ import { useEffect } from "react"
 
 import { useStorage } from "@liveblocks/react/suspense"
 import { useLiveblocksExtension } from "@liveblocks/react-tiptap"
-import { Color } from "@tiptap/extension-color"
-import { FontFamily } from "@tiptap/extension-font-family"
-import { Highlight } from "@tiptap/extension-highlight"
-import Image from "@tiptap/extension-image"
-import { Link } from "@tiptap/extension-link"
-import {
-  Table,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@tiptap/extension-table"
-import TaskItem from "@tiptap/extension-task-item"
-import TaskList from "@tiptap/extension-task-list"
-import { TextAlign } from "@tiptap/extension-text-align"
-import { TextStyle } from "@tiptap/extension-text-style"
 import { EditorContent, useEditor } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
 
 import { LEFT_MARGIN_DEFAULT, RIGHT_MARGIN_DEFAULT } from "@/constants/margins"
-import { FontSizeExtension } from "@/extensions/font-size"
-import { LineHeightExtension } from "@/extensions/line-height"
 import { useEditorStore } from "@/store/use-editor-store"
 
+import { createEditorExtensions } from "./editor-extensions"
 import { Ruler } from "./ruler"
 import { Threads } from "./threads"
 
@@ -97,47 +80,7 @@ export function DocumentEditor({
           "focus:outline-none print:border-0 bg-card text-card-foreground border border-border shadow-xs flex flex-col min-h-[1054px] w-[816px] pt-10 pb-10 pl-[var(--page-margin-left,56px)] pr-[var(--page-margin-right,56px)] cursor-text print:bg-white print:text-black print:border-none print:p-0 print:shadow-none",
       },
     },
-    extensions: [
-      liveblocks,
-      StarterKit.configure({
-        link: false,
-        undoRedo: false,
-      }),
-      LineHeightExtension,
-      FontSizeExtension,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: "https",
-      }),
-      FontFamily,
-      TextStyle,
-      Color,
-      Highlight.configure({
-        multicolor: true,
-      }),
-      // Enables resizable inline images
-      Image.configure({
-        resize: {
-          enabled: true,
-        },
-      }),
-      // Table support with resizable columns
-      Table.configure({
-        resizable: true,
-      }),
-      TableCell,
-      TableHeader,
-      TableRow,
-      // Nested task lists (checkboxes)
-      TaskItem.configure({
-        nested: true,
-      }),
-      TaskList,
-    ],
+    extensions: createEditorExtensions(liveblocks),
   })
 
   // Sync the editor instance to the global store via useEffect so the

@@ -9,6 +9,8 @@
  */
 
 import type * as documents from "../documents.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as storage from "../storage.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +20,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   documents: typeof documents;
+  "lib/auth": typeof lib_auth;
+  storage: typeof storage;
 }>;
 
 /**
