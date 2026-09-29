@@ -24,8 +24,10 @@ Import sorting is strictly enforced via `eslint-plugin-simple-import-sort` in `e
 3. **Third-party npm packages** (excluding project aliases):
    ```typescript
    import { Editor } from "@tiptap/react"
-   import { LucideIcon, Bold } from "lucide-react"
+   import { BoldIcon, LucideIcon } from "lucide-react"
    ```
+   > [!NOTE]
+   > All icons imported from `lucide-react` must include an `Icon` suffix (e.g. `BoldIcon`, `LoaderIcon`). See [`docs/code-conventions-typescript.md`](code-conventions-typescript.md) for details.
 4. **Internal project aliases (`@/*`)**:
    ```typescript
    import { Button } from "@/components/ui/button"

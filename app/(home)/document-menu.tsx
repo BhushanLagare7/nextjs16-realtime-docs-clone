@@ -1,7 +1,7 @@
 import {
   ExternalLinkIcon,
   FilePenIcon,
-  MoreVertical,
+  MoreVerticalIcon,
   TrashIcon,
 } from "lucide-react"
 
@@ -38,7 +38,7 @@ export function DocumentMenu({
           variant="ghost"
           onClick={(e) => e.stopPropagation()}
         >
-          <MoreVertical className="size-4" />
+          <MoreVerticalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-48">

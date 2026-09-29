@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 import { auth } from "@clerk/nextjs/server"
@@ -8,6 +9,14 @@ import { api } from "@/convex/_generated/api"
 import type { Id } from "@/convex/_generated/dataModel"
 
 import { Document } from "./document"
+
+export const metadata: Metadata = {
+  title: "Document",
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 interface DocumentIdPageProps {
   /** Next.js dynamic route params, resolved asynchronously */
