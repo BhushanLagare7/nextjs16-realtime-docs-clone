@@ -33,7 +33,8 @@ nextjs16-realtime-docs-clone/
 │   └── theme-provider.tsx  # Next-themes provider
 ├── constants/              # Application-wide static constants (color palette, margins, templates)
 ├── convex/                 # Convex backend schema, queries, mutations
-│   └── lib/                # Shared backend helpers (auth & ownership guards)
+│   ├── lib/                # Shared backend helpers (auth & ownership guards)
+│   └── storage.ts          # File storage upload URL generation & URL resolution
 ├── docs/                   # Modular convention documentation
 ├── extensions/             # Custom Tiptap editor extensions
 ├── hooks/                  # Reusable custom hooks (e.g., debounce, search params)

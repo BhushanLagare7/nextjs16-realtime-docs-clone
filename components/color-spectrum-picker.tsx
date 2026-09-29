@@ -76,6 +76,7 @@ export function ColorSpectrumPicker({
                 #
               </span>
               <HexColorInput
+                aria-label="Custom hex color"
                 className="h-7 w-full bg-transparent px-1 font-mono text-xs text-foreground uppercase focus:outline-hidden"
                 color={draftColor}
                 onChange={setDraftColor}

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react"
 
+import { useConvex, useMutation } from "convex/react"
 import { ImageIcon, SearchIcon, UploadIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { api } from "@/convex/_generated/api"
+import type { Id } from "@/convex/_generated/dataModel"
 import { useEditorStore } from "@/store/use-editor-store"
 
 /**
@@ -37,22 +40,52 @@ export function ImageButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [imageUrl, setImageUrl] = useState("")
   const imageButtonRef = useRef<HTMLButtonElement | null>(null)
+  const convex = useConvex()
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl)
 
   const onChange = (src: string) => {
     editor?.chain().focus().setImage({ src }).run()
   }
 
-  /** Opens a native file picker and inserts the selected image as an object URL */
+  /** Opens a native file picker and uploads the selected image to Convex storage */
   const onUpload = () => {
     const input = document.createElement("input")
     input.type = "file"
     input.accept = "image/*"
 
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        const imageUrl = URL.createObjectURL(file)
-        onChange(imageUrl)
+      if (!file) return
+
+      try {
+        // 1. Get a short-lived upload URL from Convex
+        const uploadUrl = await generateUploadUrl()
+
+        // 2. POST the file to Convex storage
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        })
+
+        if (!result.ok) {
+          throw new Error(`Upload failed: ${result.statusText}`)
+        }
+
+        const { storageId } = (await result.json()) as {
+          storageId: Id<"_storage">
+        }
+
+        // 3. Resolve the storage ID to a persistent public URL
+        const storageUrl = await convex.query(api.storage.getUrl, {
+          storageId,
+        })
+
+        if (storageUrl) {
+          onChange(storageUrl)
+        }
+      } catch (error) {
+        console.error("Image upload failed:", error)
       }
     }
 

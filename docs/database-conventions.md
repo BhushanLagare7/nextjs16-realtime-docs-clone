@@ -51,3 +51,13 @@ export default defineSchema({
 
 - Detailed pagination queries, internal lookup queries, and search indexing are documented in [`docs/database-queries.md`](database-queries.md).
 - Detailed mutation patterns, multi-tenancy invariants, and the authorization guard convention are documented in [`docs/database-mutations.md`](database-mutations.md).
+
+---
+
+## 4. File Storage Conventions (`convex/storage.ts`)
+
+File uploads (e.g., editor images) use Convex Storage with a three-step presigned flow:
+
+1. **Upload URL Generation**: The `generateUploadUrl` mutation authenticates the caller via `requireAuth(ctx)` and returns a short-lived POST upload URL using `ctx.storage.generateUploadUrl()`.
+2. **Direct Client Upload**: The client POSTs the file binary directly to the upload URL with the appropriate `Content-Type` header, receiving a JSON response containing `{ storageId: Id<"_storage"> }`.
+3. **Serving URL Resolution**: The `getUrl` query accepts `storageId: v.id("_storage")` and resolves it to a public serving URL via `ctx.storage.getUrl(storageId)`.
